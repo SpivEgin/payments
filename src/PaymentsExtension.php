@@ -3,6 +3,7 @@
 namespace Bolt\Extension\Bolt\Payments;
 
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
+use Bolt\Extension\Bolt\Payments\Provider\PaymentsServiceProvider;
 use Bolt\Extension\SimpleExtension;
 
 /**
@@ -12,6 +13,17 @@ use Bolt\Extension\SimpleExtension;
  */
 class PaymentsExtension extends SimpleExtension
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function getServiceProviders()
+    {
+        return [
+            $this,
+            new PaymentsServiceProvider($this->getConfig()),
+        ];
+    }
+
     /**
      * {@inheritdoc}
      */
