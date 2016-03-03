@@ -9,6 +9,8 @@ namespace Bolt\Extension\Bolt\Payments\Config;
  */
 class Config
 {
+    /** @var string */
+    protected $mountpoint;
     /**
      * Constructor.
      *
@@ -17,5 +19,15 @@ class Config
     public function __construct(array $config)
     {
         $this->mountpoint = $config['mountpoint'];
+    }
+
+    /**
+     * Return the base route.
+     *
+     * @return string
+     */
+    public function getMountpoint()
+    {
+        return $this->mountpoint;
     }
 }

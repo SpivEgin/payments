@@ -2,6 +2,7 @@
 
 namespace Bolt\Extension\Bolt\Payments;
 
+use Bolt\Extension\Bolt\Payments\Controller\Frontend;
 use Bolt\Extension\SimpleExtension;
 
 /**
@@ -14,8 +15,24 @@ class PaymentsExtension extends SimpleExtension
     /**
      * {@inheritdoc}
      */
+    protected function registerFrontendControllers()
+    {
+        $app = $this->getContainer();
+        $config = $this->getConfig();
+        $mountPoint = (string) $config['mountpoint'];
+
+        return [
+            $mountPoint => new Frontend($app['payments.config']),
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function getDefaultConfig()
     {
-        return [];
+        return [
+            'mountpoint' => 'payments',
+        ];
     }
 }

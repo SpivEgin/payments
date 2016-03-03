@@ -1,3 +1,7 @@
 ##
 ## Payments Bolt Extension
 ##
+
+## Base URL for routes
+#
+#mountpoint: payments
