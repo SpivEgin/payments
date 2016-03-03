@@ -29,10 +29,26 @@ class PaymentsExtension extends SimpleExtension
     /**
      * {@inheritdoc}
      */
+    protected function registerTwigPaths()
+    {
+        return [
+            'templates',
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function getDefaultConfig()
     {
         return [
             'mountpoint' => 'payments',
+            'templates'  => [
+                'parent'   => 'layout.twig',
+                'gateway'  => 'gateway.twig',
+                'request'  => 'request.twig',
+                'response' => 'layout.twig',
+            ],
         ];
     }
 }

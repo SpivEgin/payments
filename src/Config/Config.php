@@ -11,6 +11,8 @@ class Config
 {
     /** @var string */
     protected $mountpoint;
+    /** @var array */
+    protected $templates;
     /**
      * Constructor.
      *
@@ -29,5 +31,15 @@ class Config
     public function getMountpoint()
     {
         return $this->mountpoint;
+    }
+
+    /**
+     * Return a configured template name.
+     *
+     * @return string
+     */
+    public function getTemplate($template)
+    {
+        return $this->templates[$template];
     }
 }

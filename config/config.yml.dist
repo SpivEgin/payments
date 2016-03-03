@@ -5,3 +5,11 @@
 ## Base URL for routes
 #
 #mountpoint: payments
+
+## Template overrides
+#
+#templates:
+#    parent: layout.twig
+#    gateway: gateway.twig
+#    request: request.twig
+#    response: response.twig
