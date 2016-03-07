@@ -5,6 +5,8 @@ namespace Bolt\Extension\Bolt\Payments\Provider;
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
 use Bolt\Extension\Bolt\Payments\Processor;
+use Bolt\Extension\Bolt\Payments\Storage\Schema\Table;
+use Pimple as Container;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 
@@ -53,6 +55,20 @@ class PaymentsServiceProvider implements ServiceProviderInterface
         $app['payments.controller.frontend'] = $app->share(
             function ($app) {
                 return new Frontend($app['payments.config']);
+            }
+        );
+
+        $app['payments.schema.table'] = $app->share(
+            function () use ($app) {
+                /** @var \Doctrine\DBAL\Platforms\AbstractPlatform $platform */
+                $platform = $app['db']->getDatabasePlatform();
+                $prefix = $app['schema.prefix'];
+
+                // @codingStandardsIgnoreStart
+                return new Container([
+                    'payment' => $app->share(function () use ($platform, $prefix) { return new Table\Payment($platform, $prefix); }),
+                ]);
+                // @codingStandardsIgnoreEnd
             }
         );
     }
