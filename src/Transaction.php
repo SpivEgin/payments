@@ -7,7 +7,7 @@ namespace Bolt\Extension\Bolt\Payments;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class Transaction
+class Transaction implements \ArrayAccess
 {
     /** @var float */
     protected $amount;
@@ -29,6 +29,38 @@ class Transaction
     protected $notifyUrl;
     /** @var string */
     protected $issuer;
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetExists($offset)
+    {
+        return property_exists($this, $offset);
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetGet($offset)
+    {
+        return $this->$offset;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetSet($offset, $value)
+    {
+        $this->$offset = $value;
+    }
+
+    /**
+     * @inheritDoc
+     */
+    public function offsetUnset($offset)
+    {
+        $this->$offset = null;
+    }
 
     /**
      * Create a new instance.
