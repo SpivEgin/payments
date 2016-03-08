@@ -2,17 +2,60 @@
 
 namespace Bolt\Extension\Bolt\Payments;
 
+use Bolt\Events\ControllerEvents;
+use Bolt\Extension\AbstractExtension;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
 use Bolt\Extension\Bolt\Payments\Provider\PaymentsServiceProvider;
-use Bolt\Extension\SimpleExtension;
+use Bolt\Extension\ConfigTrait;
+use Bolt\Extension\ControllerMountTrait;
+use Bolt\Extension\DatabaseSchemaTrait;
+use Bolt\Extension\TwigTrait;
+use Silex\Application;
+use Silex\ServiceProviderInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Payments extension loader class.
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class PaymentsExtension extends SimpleExtension
+class PaymentsExtension extends AbstractExtension implements ServiceProviderInterface, EventSubscriberInterface
 {
+    use ConfigTrait;
+    use ControllerMountTrait;
+    use DatabaseSchemaTrait;
+    use TwigTrait;
+
+    /**
+     * {@inheritdoc}
+     */
+    public function register(Application $app)
+    {
+        $this->extendTwigService();
+        $this->extendDatabaseSchemaServices();
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public static function getSubscribedEvents()
+    {
+        return [
+            ControllerEvents::MOUNT => [
+                ['onMountControllers', 0],
+            ],
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function boot(Application $app)
+    {
+        $this->container = $app;
+        $this->container['dispatcher']->addSubscriber($this);
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -45,6 +88,18 @@ class PaymentsExtension extends SimpleExtension
     {
         return [
             'templates',
+        ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function registerExtensionTables()
+    {
+        $app = $this->getContainer();
+
+        return [
+            'payment' => $app['payments.schema.table']['payment'],
         ];
     }
 
