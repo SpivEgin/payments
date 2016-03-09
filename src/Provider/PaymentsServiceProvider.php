@@ -4,6 +4,7 @@ namespace Bolt\Extension\Bolt\Payments\Provider;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
+use Bolt\Extension\Bolt\Payments\Form;
 use Bolt\Extension\Bolt\Payments\Processor;
 use Bolt\Extension\Bolt\Payments\Storage\Schema\Table;
 use Pimple as Container;
@@ -47,7 +48,46 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                     $app['payments.config'],
                     $app['twig'],
                     $app['session'],
-                    $app['storage']
+                    $app['storage'],
+                    $app['payments.form']
+                );
+            }
+        );
+
+        $app['payments.form.components'] = $app->share(
+            function ($app) {
+                $type = new Container(
+                    [
+                        // @codingStandardsIgnoreStart
+                        'credit_card' => $app->share(function () use ($app) { return new Form\Type\CreditCardPayment($app['payments.config']); }),
+                        // @codingStandardsIgnoreEnd
+                    ]
+                );
+                $entity = new Container(
+                    [
+                    ]
+                );
+                $constraint = new Container(
+                    [
+                    ]
+                );
+
+                return new Container([
+                    'type'       => $type,
+                    'entity'     => $entity,
+                    'constraint' => $constraint,
+                ]);
+            }
+        );
+
+        $app['payments.form'] = $app->share(
+            function ($app) {
+                return new Container(
+                    [
+                        // @codingStandardsIgnoreStart
+                        'credit_card_payment' => $app->share(function () use ($app) { return new Form\CreditCardPaymentForm($app['form.factory'], $app['payments.form.components']['type']['credit_card']); }),
+                        // @codingStandardsIgnoreEnd
+                    ]
                 );
             }
         );
