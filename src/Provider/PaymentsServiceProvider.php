@@ -59,7 +59,7 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                 $type = new Container(
                     [
                         // @codingStandardsIgnoreStart
-                        'credit_card' => $app->share(function () use ($app) { return new Form\Type\CreditCardPayment($app['payments.config']); }),
+                        'credit_card' => $app->share(function () use ($app) { return new Form\Type\CreditCardPaymentType($app['payments.config']); }),
                         // @codingStandardsIgnoreEnd
                     ]
                 );

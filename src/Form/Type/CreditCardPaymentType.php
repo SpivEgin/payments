@@ -18,7 +18,7 @@ use Symfony\Component\Validator\Constraints as Assert;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class CreditCardPayment extends AbstractType
+class CreditCardPaymentType extends AbstractType
 {
     /** @var Config */
     protected $config;
@@ -308,8 +308,12 @@ class CreditCardPayment extends AbstractType
                     ],
                     'constraints' => [
                         new Assert\NotBlank(),
+                        new Assert\Email(
+                            [
+                                'checkMX' => true,
+                            ]
+                        ),
                     ],
-                    'checkMX'     => true,
                 ]
             )
             ->add(
@@ -342,7 +346,7 @@ class CreditCardPayment extends AbstractType
     /**
      * @param boolean $requireCreditCard
      *
-     * @return CreditCardPayment
+     * @return CreditCardPaymentType
      */
     public function setRequireCreditCard($requireCreditCard)
     {
