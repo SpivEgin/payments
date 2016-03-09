@@ -13,6 +13,9 @@ class Config
     protected $mountpoint;
     /** @var array */
     protected $templates;
+    /** @var array */
+    protected $forms;
+
     /**
      * Constructor.
      *
@@ -21,6 +24,7 @@ class Config
     public function __construct(array $config)
     {
         $this->mountpoint = $config['mountpoint'];
+        $this->forms = $config['forms'];
     }
 
     /**
@@ -41,5 +45,29 @@ class Config
     public function getTemplate($template)
     {
         return $this->templates[$template];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormLabel($form, $field)
+    {
+        return $this->forms[$form][$field]['label'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormPlaceholder($form, $field)
+    {
+        return $this->forms[$form][$field]['placeholder'];
+    }
+
+    /**
+     * @return string
+     */
+    public function getFormRequired($form, $field)
+    {
+        return $this->forms[$form][$field]['required'];
     }
 }

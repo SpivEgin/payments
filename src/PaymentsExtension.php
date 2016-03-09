@@ -110,6 +110,95 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
     {
         return [
             'mountpoint' => 'payments',
+            'forms' => [
+                'credit_card' => [
+                    'first_name' => [
+                        'label'       => 'First Name',
+                        'placeholder' => 'First Name',
+                        'required'    => true,
+                    ],
+                    'last_name' => [
+                        'label'       => 'Last Name',
+                        'placeholder' => '',
+                        'required'    => true,
+                    ],
+                    'expiry_month' => [
+                        'label'       => 'Expiry Month',
+                        'placeholder' => 'Expiry Month',
+                        'required'    => true,
+                    ],
+                    'expiry_year' => [
+                        'label'       => 'Expiry Year',
+                        'placeholder' => 'Expiry Year',
+                        'required'    => true,
+                    ],
+                    'start_month' => [
+                        'label'       => 'Start Month',
+                        'placeholder' => 'Start Month',
+                        'required'    => false,
+                    ],
+                    'start_year' => [
+                        'label'       => 'Start Year',
+                        'placeholder' => 'Start Year',
+                        'required'    => false,
+                    ],
+                    'number' => [
+                        'label'       => 'Card Number',
+                        'placeholder' => 'Card Number',
+                        'required'    => true,
+                    ],
+                    'ccv' => [
+                        'label'       => 'Card Verification Value',
+                        'placeholder' => 'Card Verification Value',
+                        'required'    => true,
+                    ],
+                    'issue_number' => [
+                        'label'       => 'Issue Number',
+                        'placeholder' => 'Issue Number',
+                        'required'    => true,
+                    ],
+                    'address_1' => [
+                        'label'       => 'Address',
+                        'placeholder' => 'Address',
+                        'required'    => true,
+                    ],
+                    'address_2' => [
+                        'label'       => '',
+                        'placeholder' => '',
+                        'required'    => false,
+                    ],
+                    'address_city' => [
+                        'label'       => 'City',
+                        'placeholder' => 'City',
+                        'required'    => true,
+                    ],
+                    'address_postcode' => [
+                        'label'       => 'Postcode',
+                        'placeholder' => 'Postcode',
+                        'required'    => true,
+                    ],
+                    'address_state' => [
+                        'label'       => 'State or Province',
+                        'placeholder' => 'State or Province',
+                        'required'    => true,
+                    ],
+                    'address_country' => [
+                        'label'       => 'Country',
+                        'placeholder' => 'Country',
+                        'required'    => false,
+                    ],
+                    'phone' => [
+                        'label'       => 'Phone Number',
+                        'placeholder' => 'Phone Number',
+                        'required'    => false,
+                    ],
+                    'email' => [
+                        'label'       => 'Email Address',
+                        'placeholder' => 'Email Address',
+                        'required'    => false,
+                    ],
+                ],
+            ],
             'templates'  => [
                 'parent'   => 'layout.twig',
                 'gateway'  => 'gateway.twig',
