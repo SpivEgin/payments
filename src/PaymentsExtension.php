@@ -119,7 +119,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
                     ],
                     'last_name' => [
                         'label'       => 'Last Name',
-                        'placeholder' => '',
+                        'placeholder' => 'Last Name',
                         'required'    => true,
                     ],
                     'expiry_month' => [
