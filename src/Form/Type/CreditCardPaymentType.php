@@ -61,6 +61,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'first_name'),
                 ]
             )
             ->add(
@@ -75,6 +76,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'last_name'),
                 ]
             )
             ->add(
@@ -90,6 +92,7 @@ class CreditCardPaymentType extends AbstractType
                         new Assert\NotBlank(),
                         new Assert\Luhn(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'number'),
                 ]
             )
             ->add(
@@ -110,6 +113,7 @@ class CreditCardPaymentType extends AbstractType
                             'maxMessage' => 'Must be a numerical month value',
                         ]),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'expiry_month'),
                 ]
             )
             ->add(
@@ -130,6 +134,7 @@ class CreditCardPaymentType extends AbstractType
                             'maxMessage' => sprintf('Year must be before %s.', Carbon::now()->addYears(10)->format('Y')),
                         ]),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'expiry_year'),
                 ]
             )
             ->add(
@@ -150,6 +155,7 @@ class CreditCardPaymentType extends AbstractType
                             'maxMessage' => 'Must be a numerical month value',
                         ]),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'start_month'),
                 ]
             )
             ->add(
@@ -170,6 +176,7 @@ class CreditCardPaymentType extends AbstractType
                             'maxMessage' => sprintf('Year must be after %s.', Carbon::now()->addYears(-10)->format('Y')),
                         ]),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'start_year'),
                 ]
             )
             ->add(
@@ -184,6 +191,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'ccv'),
                 ]
             )
             ->add(
@@ -198,6 +206,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'issue_number'),
                 ]
             )
             ->add(
@@ -212,6 +221,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'address_1'),
                 ]
             )
             ->add(
@@ -225,6 +235,7 @@ class CreditCardPaymentType extends AbstractType
                     ],
                     'constraints' => [
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'address_2'),
                 ]
             )
             ->add(
@@ -239,6 +250,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'address_city'),
                 ]
             )
             ->add(
@@ -253,6 +265,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'address_postcode'),
                 ]
             )
             ->add(
@@ -267,6 +280,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'address_state'),
                 ]
             )
             ->add(
@@ -281,6 +295,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'address_country'),
                 ]
             )
             ->add(
@@ -295,6 +310,7 @@ class CreditCardPaymentType extends AbstractType
                     'constraints' => [
                         new Assert\NotBlank(),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'phone'),
                 ]
             )
             ->add(
@@ -314,6 +330,7 @@ class CreditCardPaymentType extends AbstractType
                             ]
                         ),
                     ],
+                    'required'    => $this->config->getFormRequired('credit_card', 'email'),
                 ]
             )
             ->add(
