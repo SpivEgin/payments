@@ -1,0 +1,94 @@
+{% block card_style %}
+<style>
+    .card-security {
+        display: flex;
+    }
+    .card-validity-dates {
+        display: flex;
+    }
+    .card-validity-date-chooser {
+        display: flex;
+    }
+</style>
+{% endblock %}
+
+<div class="bolt-payments credit-card">
+    {{ form_start(credit_card_form) }}
+
+    {# Account holder #}
+    <div class="card-holder">
+        {{ form_row(credit_card_form.firstName) }}
+        {{ form_row(credit_card_form.lastName) }}
+    </div>
+
+    {# Card number #}
+    <div class="card-security">
+        <div class="card-number">
+            {{ form_errors(credit_card_form.number) }}
+            {{ form_label(credit_card_form.number) }}
+            {{ form_widget(credit_card_form.number) }}
+        </div>
+        <div class="card-ccv">
+            {{ form_errors(credit_card_form.ccv) }}
+            {{ form_label(credit_card_form.ccv) }}
+            {{ form_widget(credit_card_form.ccv) }}
+        </div>
+        <div class="card-issue-number">
+            {{ form_errors(credit_card_form.issueNumber) }}
+            {{ form_label(credit_card_form.issueNumber) }}
+            {{ form_widget(credit_card_form.issueNumber) }}
+        </div>
+    </div>
+
+    {# Validity dates #}
+    <div class="card-validity-dates">
+        <div class="card-validity-date-start">
+            {{ form_errors(credit_card_form.startDate) }}
+            {{ form_label(credit_card_form.startDate) }}
+            <div class="card-validity-date-chooser" style="display: flex">
+                {{ form_widget(credit_card_form.startDate.month) }}
+                {{ form_widget(credit_card_form.startDate.year) }}
+            </div>
+        </div>
+        <div class="card-validity-date-end">
+            {{ form_errors(credit_card_form.expiryDate) }}
+            {{ form_label(credit_card_form.expiryDate) }}
+            <div class="card-validity-date-chooser" style="display: flex">
+                {{ form_widget(credit_card_form.expiryDate.month) }}
+                {{ form_widget(credit_card_form.expiryDate.year) }}
+            </div>
+        </div>
+    </div>
+
+    {# Address Details #}
+    <div class="card-holder-address">
+        <div class="card-holder-address-street">
+            {{ form_row(credit_card_form.address1) }}
+        </div>
+        <div class="card-holder-address-street-misc">
+            {{ form_row(credit_card_form.address2) }}
+        </div>
+        <div class="card-holder-address-city">
+            {{ form_row(credit_card_form.city) }}
+        </div>
+        <div class="card-holder-address-postcode">
+            {{ form_row(credit_card_form.postcode) }}
+        </div>
+        <div class="card-holder-address-state">
+            {{ form_row(credit_card_form.state) }}
+        </div>
+        <div class="card-holder-address-country">
+            {{ form_row(credit_card_form.country) }}
+        </div>
+        <div class="card-holder-address-phone">
+            {{ form_row(credit_card_form.phone) }}
+        </div>
+        <div class="card-holder-address-email">
+            {{ form_row(credit_card_form.email) }}
+        </div>
+    </div>
+
+    {{ form_row(credit_card_form.submit) }}
+
+    {{ form_end(credit_card_form) }}
+</div>
