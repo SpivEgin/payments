@@ -122,24 +122,14 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
                         'placeholder' => 'Last Name',
                         'required'    => true,
                     ],
-                    'expiry_month' => [
-                        'label'       => 'Expiry Month',
-                        'placeholder' => 'Expiry Month',
-                        'required'    => true,
+                    'expiry_date' => [
+                        'label'       => 'Expiry Date',
+                        'placeholder' => 'Expiry Date',
+                        'required'    => true,false
                     ],
-                    'expiry_year' => [
-                        'label'       => 'Expiry Year',
-                        'placeholder' => 'Expiry Year',
-                        'required'    => true,
-                    ],
-                    'start_month' => [
-                        'label'       => 'Start Month',
-                        'placeholder' => 'Start Month',
-                        'required'    => false,
-                    ],
-                    'start_year' => [
-                        'label'       => 'Start Year',
-                        'placeholder' => 'Start Year',
+                    'start_date' => [
+                        'label'       => 'Start Date',
+                        'placeholder' => 'Start Date',
                         'required'    => false,
                     ],
                     'number' => [
@@ -155,7 +145,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
                     'issue_number' => [
                         'label'       => 'Issue Number',
                         'placeholder' => 'Issue Number',
-                        'required'    => true,
+                        'required'    => false,
                     ],
                     'address_1' => [
                         'label'       => 'Address',
