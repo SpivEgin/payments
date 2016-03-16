@@ -46,6 +46,7 @@
             {{ form_errors(forms.credit_card.startDate) }}
             {{ form_label(forms.credit_card.startDate) }}
             <div class="card-validity-date-chooser" style="display: flex">
+                {% do forms.credit_card.startDate.day.setRendered %}
                 {{ form_widget(forms.credit_card.startDate.month) }}
                 {{ form_widget(forms.credit_card.startDate.year) }}
             </div>
@@ -54,6 +55,7 @@
             {{ form_errors(forms.credit_card.expiryDate) }}
             {{ form_label(forms.credit_card.expiryDate) }}
             <div class="card-validity-date-chooser" style="display: flex">
+                {% do forms.credit_card.expiryDate.day.setRendered %}
                 {{ form_widget(forms.credit_card.expiryDate.month) }}
                 {{ form_widget(forms.credit_card.expiryDate.year) }}
             </div>
