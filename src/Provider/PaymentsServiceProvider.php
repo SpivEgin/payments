@@ -59,7 +59,8 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                 $type = new Container(
                     [
                         // @codingStandardsIgnoreStart
-                        'credit_card' => $app->share(function () use ($app) { return new Form\Type\CreditCardPaymentType($app['payments.config']); }),
+                        'address'     => $app->share(function () use ($app) { return new Form\Type\AddressType($app['payments.config']); }),
+                        'credit_card' => $app->share(function () use ($app) { return new Form\Type\CreditCardType($app['payments.config']); }),
                         // @codingStandardsIgnoreEnd
                     ]
                 );
@@ -84,9 +85,30 @@ class PaymentsServiceProvider implements ServiceProviderInterface
             function ($app) {
                 return new Container(
                     [
-                        // @codingStandardsIgnoreStart
-                        'credit_card_payment' => $app->share(function () use ($app) { return new Form\CreditCardPaymentForm($app['form.factory'], $app['payments.form.components']['type']['credit_card']); }),
-                        // @codingStandardsIgnoreEnd
+                        'credit_card'      => $app->share(
+                            function () use ($app) {
+                                return new Form\CreditCardForm(
+                                    $app['form.factory'],
+                                    $app['payments.form.components']['type']['credit_card']
+                                );
+                            }
+                        ),
+                        'billing_address'  => $app->share(
+                            function () use ($app) {
+                                return new Form\BillingAddressForm(
+                                    $app['form.factory'],
+                                    $app['payments.form.components']['type']['address']
+                                );
+                            }
+                        ),
+                        'shipping_address' => $app->share(
+                            function () use ($app) {
+                                return new Form\ShippingAddressForm(
+                                    $app['form.factory'],
+                                    $app['payments.form.components']['type']['address']
+                                );
+                            }
+                        ),
                     ]
                 );
             }
