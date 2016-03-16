@@ -6,6 +6,12 @@
     <div class="bolt-payments address">
         {{ form_start(form) }}
 
+        {# Account holder #}
+        <div class="{{ name }}-name">
+            {{ form_row(form.lastName) }}
+            {{ form_row(form.firstName) }}
+        </div>
+
         {# Address Details #}
         <div class="{{ name }}-address">
             <div class="{{ name }}-address-street">
