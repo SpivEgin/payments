@@ -10,7 +10,7 @@ use Symfony\Component\OptionsResolver\OptionsResolver;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class ValidExpiryDateType extends AbstractCreditCardDateType
+class ValidExpiryDateType extends AbstractValidationDateType
 {
     /**
      * {@inheritDoc}

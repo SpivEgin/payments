@@ -12,7 +12,7 @@ use Symfony\Component\Form\FormView;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class AbstractCreditCardDateType extends AbstractType
+class AbstractValidationDateType extends AbstractType
 {
     /**
      * {@inheritDoc}
