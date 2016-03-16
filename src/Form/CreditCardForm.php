@@ -11,7 +11,7 @@ use Symfony\Component\Form\FormTypeInterface;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class CreditCardPaymentForm
+class CreditCardForm
 {
     /** @var FormFactoryInterface */
     protected $formFactory;
