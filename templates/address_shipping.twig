@@ -1,17 +1,3 @@
 {% import "_address.twig" as address %}
 
-{% block card_style %}
-    <style>
-        .card-security {
-            display: flex;
-        }
-        .card-validity-dates {
-            display: flex;
-        }
-        .card-validity-date-chooser {
-            display: flex;
-        }
-    </style>
-{% endblock %}
-
 {{ address.output_form(forms.shipping_address, "shipping") }}
