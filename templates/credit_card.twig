@@ -60,34 +60,6 @@
         </div>
     </div>
 
-    {# Address Details #}
-    <div class="card-holder-address">
-        <div class="card-holder-address-street">
-            {{ form_row(credit_card_form.address1) }}
-        </div>
-        <div class="card-holder-address-street-misc">
-            {{ form_row(credit_card_form.address2) }}
-        </div>
-        <div class="card-holder-address-city">
-            {{ form_row(credit_card_form.city) }}
-        </div>
-        <div class="card-holder-address-postcode">
-            {{ form_row(credit_card_form.postcode) }}
-        </div>
-        <div class="card-holder-address-state">
-            {{ form_row(credit_card_form.state) }}
-        </div>
-        <div class="card-holder-address-country">
-            {{ form_row(credit_card_form.country) }}
-        </div>
-        <div class="card-holder-address-phone">
-            {{ form_row(credit_card_form.phone) }}
-        </div>
-        <div class="card-holder-address-email">
-            {{ form_row(credit_card_form.email) }}
-        </div>
-    </div>
-
     {{ form_row(credit_card_form.submit) }}
 
     {{ form_end(credit_card_form) }}
