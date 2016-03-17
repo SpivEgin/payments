@@ -110,8 +110,8 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
     {
         return [
             'mountpoint' => 'payments',
-            'forms' => [
-                'credit_card' => [
+            'forms'      => [
+                'address' => [
                     'first_name' => [
                         'label'       => 'First Name',
                         'placeholder' => 'First Name',
@@ -122,34 +122,9 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
                         'placeholder' => 'Last Name',
                         'required'    => true,
                     ],
-                    'expiry_date' => [
-                        'label'       => 'Expiry Date',
-                        'placeholder' => 'Expiry Date',
-                        'required'    => true,false
-                    ],
-                    'start_date' => [
-                        'label'       => 'Start Date',
-                        'placeholder' => 'Start Date',
-                        'required'    => false,
-                    ],
-                    'number' => [
-                        'label'       => 'Card Number',
-                        'placeholder' => 'Card Number',
-                        'required'    => true,
-                    ],
-                    'ccv' => [
-                        'label'       => 'Card Verification Value',
-                        'placeholder' => 'Card Verification Value',
-                        'required'    => true,
-                    ],
-                    'issue_number' => [
-                        'label'       => 'Issue Number',
-                        'placeholder' => 'Issue Number',
-                        'required'    => false,
-                    ],
                     'address_1' => [
-                        'label'       => 'Address',
-                        'placeholder' => 'Address',
+                        'label'       => 'Street Address',
+                        'placeholder' => 'Street Address',
                         'required'    => true,
                     ],
                     'address_2' => [
@@ -185,6 +160,43 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
                     'email' => [
                         'label'       => 'Email Address',
                         'placeholder' => 'Email Address',
+                        'required'    => false,
+                    ],
+                ],
+                'credit_card' => [
+                    'first_name' => [
+                        'label'       => 'First Name',
+                        'placeholder' => 'First Name',
+                        'required'    => true,
+                    ],
+                    'last_name' => [
+                        'label'       => 'Last Name',
+                        'placeholder' => 'Last Name',
+                        'required'    => true,
+                    ],
+                    'expiry_date' => [
+                        'label'       => 'Expiry Date',
+                        'placeholder' => 'Expiry Date',
+                        'required'    => true, false,
+                    ],
+                    'start_date' => [
+                        'label'       => 'Start Date',
+                        'placeholder' => 'Start Date',
+                        'required'    => false,
+                    ],
+                    'number' => [
+                        'label'       => 'Card Number',
+                        'placeholder' => 'Card Number',
+                        'required'    => true,
+                    ],
+                    'ccv' => [
+                        'label'       => 'Card Verification Value',
+                        'placeholder' => 'Card Verification Value',
+                        'required'    => true,
+                    ],
+                    'issue_number' => [
+                        'label'       => 'Issue Number',
+                        'placeholder' => 'Issue Number',
                         'required'    => false,
                     ],
                 ],
