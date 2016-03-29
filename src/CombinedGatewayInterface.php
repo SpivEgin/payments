@@ -134,9 +134,5 @@ interface CombinedGatewayInterface extends GatewayInterface
     /**
      * @return boolean
      */
-
-    /**
-     * @return boolean
-     */
     public function supportsUpdateCard();
 }
