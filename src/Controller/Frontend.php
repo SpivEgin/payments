@@ -38,85 +38,57 @@ class Frontend implements ControllerProviderInterface
         /** @var $ctr ControllerCollection */
         $ctr = $app['controllers_factory'];
 
-        // gateway settings
-        $ctr->get('/gateways/{name}', [$this, 'getSettings'])
-            ->bind('payments-settings-get')
+        // Gateway settings
+        $ctr->match('/gateways/{name}', [$this, 'settings'])
+            ->method('GET|POST')
+            ->bind('payments-settings')
         ;
 
-        // save gateway settings
-        $ctr->post('/gateways/{name}', [$this, 'setSettings'])
-            ->bind('payments-settings-set')
+        // Create/submit gateway authorize
+        $ctr->match('/gateways/{name}/authorize', [$this, 'authorize'])
+            ->method('GET|POST')
+            ->bind('payments-authorize')
         ;
 
-        // create gateway authorize
-        $ctr->get('/gateways/{name}/authorize', [$this, 'getAuthorize'])
-            ->bind('payments-authorize-get')
-        ;
-
-        // submit gateway authorize
-        $ctr->post('/gateways/{name}/authorize', [$this, 'setAuthorize'])
-            ->bind('payments-authorize-set')
-        ;
-
-        // create gateway completeAuthorize
+        // Create gateway completeAuthorize
         $ctr->get('/gateways/{name}/completeAuthorize', [$this, 'completeAuthorize'])
             ->bind('payments-completeAuthorize')
         ;
 
-        // create gateway capture
-        $ctr->get('/gateways/{name}/capture', [$this, 'getCapture'])
-            ->bind('payments-capture-get')
+        // Create/submit gateway capture
+        $ctr->match('/gateways/{name}/capture', [$this, 'capture'])
+            ->method('GET|POST')
+            ->bind('payments-capture')
         ;
 
-        // submit gateway capture
-        $ctr->post('/gateways/{name}/capture', [$this, 'setCapture'])
-            ->bind('payments-capture-set')
+        // Create/submit gateway purchase
+        $ctr->get('/gateways/{name}/purchase', [$this, 'purchase'])
+            ->bind('payments-purchase')
         ;
 
-        // create gateway purchase
-        $ctr->get('/gateways/{name}/purchase', [$this, 'getPurchase'])
-            ->bind('payments-purchase-get')
-        ;
-
-        // submit gateway purchase
-        $ctr->post('/gateways/{name}/purchase', [$this, 'setPurchase'])
-            ->bind('payments-purchase-set')
-        ;
-
-        // gateway purchase return
+        // Gateway purchase return
         // this won't work for gateways which require an internet-accessible URL (yet)
         $ctr->match('/gateways/{name}/completePurchase', [$this, 'completePurchase'])
+            ->method('GET|POST')
             ->bind('payments-purchase-complete')
         ;
 
-        // create gateway create Credit Card
-        $ctr->get('/gateways/{name}/create-card', [$this, 'getCreateCard'])
-            ->bind('payments-create-card-get')
+        // Create/submit Credit Card creation form
+        $ctr->match('/gateways/{name}/create-card', [$this, 'createCard'])
+            ->method('GET|POST')
+            ->bind('payments-create-card')
         ;
 
-        // submit gateway create Credit Card
-        $ctr->post('/gateways/{name}/create-card', [$this, 'setCreateCard'])
-            ->bind('payments-create-card-set')
+        // Create/submit gateway update Credit Card
+        $ctr->match('/gateways/{name}/update-card', [$this, 'updateCard'])
+            ->method('GET|POST')
+            ->bind('payments-update-card')
         ;
 
-        // create gateway update Credit Card
-        $ctr->get('/gateways/{name}/update-card', [$this, 'getUpdateCard'])
-            ->bind('payments-update-card-get')
-        ;
-
-        // submit gateway update Credit Card
-        $ctr->post('/gateways/{name}/update-card', [$this, 'setUpdateCard'])
-            ->bind('payments-update-card-set')
-        ;
-
-        // create gateway delete Credit Card
-        $ctr->get('/gateways/{name}/delete-card', [$this, 'getDeleteCard'])
-            ->bind('payments-delete-card-get')
-        ;
-
-        // submit gateway delete Credit Card
-        $ctr->post('/gateways/{name}/delete-card', [$this, 'setDeleteCard'])
-            ->bind('payments-delete-card-set')
+        // Create/submit gateway delete Credit Card
+        $ctr->match('/gateways/{name}/delete-card', [$this, 'deleteCard'])
+            ->method('GET|POST')
+            ->bind('payments-delete-card')
         ;
 
         $ctr->after([$this, 'before']);
@@ -136,39 +108,30 @@ class Frontend implements ControllerProviderInterface
     }
 
     /**
-     * Return gateway settings.
+     * Get/save gateway settings.
      *
      * @param Application $app
+     * @param Request     $request
      * @param string      $name
      *
-     * @return Response
+     * @return Response|RedirectResponse
      */
-    public function getSettings(Application $app, $name)
+    public function settings(Application $app, Request $request, $name)
     {
+        if ($request->isMethod('POST')) {
+            $app['payments.processor']->setSettings($request, $name);
+            $target = $request->getBaseUrl() . $request->getPathInfo();
+
+            return new RedirectResponse($target);
+        }
+
         $html = $app['payments.processor']->getSettings($name);
 
         return new Response($html);
     }
 
     /**
-     * Save gateway settings.
-     *
-     * @param Application $app
-     * @param Request     $request
-     * @param string      $name
-     *
-     * @return RedirectResponse
-     */
-    public function setSettings(Application $app, Request $request, $name)
-    {
-        $app['payments.processor']->setSettings($request, $name);
-        $target = $request->getBaseUrl() . $request->getPathInfo();
-
-        return new RedirectResponse($target);
-    }
-
-    /**
-     * Create gateway authorize.
+     * Create/submit gateway authorize.
      *
      * @param Application $app
      * @param Request     $request
@@ -176,25 +139,15 @@ class Frontend implements ControllerProviderInterface
      *
      * @return Response
      */
-    public function getAuthorize(Application $app, Request $request, $name)
+    public function authorize(Application $app, Request $request, $name)
     {
+        if ($request->isMethod('POST')) {
+            $html = $app['payments.processor']->setAuthorize($request, $name);
+
+            return new Response($html);
+        }
+
         $html = $app['payments.processor']->getAuthorize($request, $name);
-
-        return new Response($html);
-    }
-
-    /**
-     * Submit gateway authorize.
-     *
-     * @param Application $app
-     * @param Request     $request
-     * @param string      $name
-     *
-     * @return Response
-     */
-    public function setAuthorize(Application $app, Request $request, $name)
-    {
-        $html = $app['payments.processor']->setAuthorize($request, $name);
 
         return new Response($html);
     }
@@ -215,64 +168,36 @@ class Frontend implements ControllerProviderInterface
     }
 
     /**
-     * Create gateway capture.
+     * Create/Submit gateway capture.
      *
      * @param Application $app
+     * @param Request     $request
      * @param string      $name
      *
      * @return Response
      */
-    public function getCapture(Application $app, $name)
+    public function capture(Application $app, Request $request, $name)
     {
+        if ($request->isMethod('POST')) {
+            $html = $app['payments.processor']->setCapture($request, $name);
+
+            return new Response($html);
+        }
+
         $html = $app['payments.processor']->getCapture($name);
 
         return new Response($html);
     }
 
-    /**
-     * Submit gateway capture.
-     *
-     * @param Application $app
-     * @param Request     $request
-     * @param string      $name
-     *
-     * @return Response
-     */
-    public function setCapture(Application $app, Request $request, $name)
+    public function purchase(Application $app, Request $request, $name)
     {
-        $html = $app['payments.processor']->setCapture($request, $name);
+        if ($request->isMethod('POST')) {
+            $html = $app['payments.processor']->setPurchase($request, $name);
 
-        return new Response($html);
-    }
+            return new Response($html);
+        }
 
-    /**
-     * Create gateway purchase.
-     *
-     * @param Application $app
-     * @param Request     $request
-     * @param string      $name
-     *
-     * @return Response
-     */
-    public function getPurchase(Application $app, Request $request, $name)
-    {
         $html = $app['payments.processor']->getPurchase($request, $name);
-
-        return new Response($html);
-    }
-
-    /**
-     * Submit gateway purchase.
-     *
-     * @param Application $app
-     * @param Request     $request
-     * @param string      $name
-     *
-     * @return Response
-     */
-    public function setPurchase(Application $app, Request $request, $name)
-    {
-        $html = $app['payments.processor']->setPurchase($request, $name);
 
         return new Response($html);
     }
@@ -296,22 +221,29 @@ class Frontend implements ControllerProviderInterface
     }
 
     /**
-     * Create gateway create Credit Card.
+     * Create/submit gateway create Credit Card.
      *
      * @param Application $app
+     * @param Request     $request
      * @param string      $name
      *
      * @return Response
      */
-    public function getCreateCard(Application $app, $name)
+    public function createCard(Application $app, Request $request, $name)
     {
+        if ($request->isMethod('POST')) {
+            $html = $app['payments.processor']->setCreateCard($request, $name);
+
+            return new Response($html);
+        }
+
         $html = $app['payments.processor']->getCreateCard($name);
 
         return new Response($html);
     }
 
     /**
-     * Submit gateway create Credit Card.
+     * Create/submit gateway update Credit Card.
      *
      * @param Application $app
      * @param Request     $request
@@ -319,30 +251,21 @@ class Frontend implements ControllerProviderInterface
      *
      * @return Response
      */
-    public function setCreateCard(Application $app, Request $request, $name)
+    public function updateCard(Application $app, Request $request, $name)
     {
-        $html = $app['payments.processor']->setCreateCard($request, $name);
+        if ($request->isMethod('POST')) {
+            $html = $app['payments.processor']->setUpdateCard($request, $name);
 
-        return new Response($html);
-    }
+            return new Response($html);
+        }
 
-    /**
-     * Create gateway update Credit Card.
-     *
-     * @param Application $app
-     * @param string      $name
-     *
-     * @return Response
-     */
-    public function getUpdateCard(Application $app, $name)
-    {
         $html = $app['payments.processor']->getUpdateCard($name);
 
         return new Response($html);
     }
 
     /**
-     * Submit gateway update Credit Card.
+     * Create/submit gateway delete Credit Card.
      *
      * @param Application $app
      * @param Request     $request
@@ -350,40 +273,15 @@ class Frontend implements ControllerProviderInterface
      *
      * @return Response
      */
-    public function setUpdateCard(Application $app, Request $request, $name)
+    public function deleteCard(Application $app, Request $request, $name)
     {
-        $html = $app['payments.processor']->setUpdateCard($request, $name);
+        if ($request->isMethod('POST')) {
+            $html = $app['payments.processor']->setDeleteCard($request, $name);
 
-        return new Response($html);
-    }
+            return new Response($html);
+        }
 
-    /**
-     * Create gateway delete Credit Card.
-     *
-     * @param Application $app
-     * @param string      $name
-     *
-     * @return Response
-     */
-    public function getDeleteCard(Application $app, $name)
-    {
         $html = $app['payments.processor']->getDeleteCard($name);
-
-        return new Response($html);
-    }
-
-    /**
-     * Submit gateway delete Credit Card.
-     *
-     * @param Application $app
-     * @param Request     $request
-     * @param string      $name
-     *
-     * @return Response
-     */
-    public function setDeleteCard(Application $app, Request $request, $name)
-    {
-        $html = $app['payments.processor']->setDeleteCard($request, $name);
 
         return new Response($html);
     }
