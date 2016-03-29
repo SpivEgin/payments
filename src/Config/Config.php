@@ -15,6 +15,8 @@ class Config
     protected $templates;
     /** @var array */
     protected $forms;
+    /** @var Provider */
+    protected $providers;
 
     /**
      * Constructor.
@@ -25,6 +27,15 @@ class Config
     {
         $this->mountpoint = $config['mountpoint'];
         $this->forms = $config['forms'];
+        $this->providers = new Provider($config);
+    }
+
+    /**
+     * @return Provider
+     */
+    public function getProviders()
+    {
+        return $this->providers;
     }
 
     /**
