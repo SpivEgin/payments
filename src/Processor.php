@@ -5,6 +5,7 @@ namespace Bolt\Extension\Bolt\Payments;
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Exception\GenericException;
 use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
+use Bolt\Extension\Bolt\Payments\Storage\Records;
 use Bolt\Storage\EntityManager;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
@@ -24,12 +25,12 @@ class Processor
 {
     /** @var Config */
     protected $config;
+    /** @var Records */
+    protected $records;
     /** @var TwigEnvironment */
     protected $twig;
     /** @var Session */
     protected $session;
-    /** @var EntityManager */
-    protected $em;
 
     /**
      * Constructor.
@@ -39,12 +40,12 @@ class Processor
      * @param Session         $session
      * @param EntityManager   $em
      */
-    public function __construct(Config $config, TwigEnvironment $twig, Session $session, EntityManager $em)
+    public function __construct(Config $config, Records $records, TwigEnvironment $twig, Session $session)
     {
         $this->config = $config;
+        $this->records = $records;
         $this->twig = $twig;
         $this->session = $session;
-        $this->em = $em;
     }
 
     /**

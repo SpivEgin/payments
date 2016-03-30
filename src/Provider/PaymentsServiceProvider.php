@@ -46,9 +46,9 @@ class PaymentsServiceProvider implements ServiceProviderInterface
             function ($app) {
                 return new Processor(
                     $app['payments.config'],
+                    $app['payments.records'],
                     $app['twig'],
                     $app['session'],
-                    $app['storage'],
                     $app['payments.form']
                 );
             }
