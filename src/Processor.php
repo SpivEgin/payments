@@ -104,7 +104,7 @@ class Processor
     }
 
     /**
-     * Create gateway authorize.
+     * Request GET handler to authorize an amount on the customer's card.
      *
      * @param Request $request
      * @param string  $name
@@ -131,7 +131,7 @@ class Processor
     }
 
     /**
-     * Submit gateway authorize.
+     * Request POST handler to authorize an amount on the customer's card.
      *
      * @param Request $request
      * @param string  $name
@@ -166,7 +166,7 @@ class Processor
     }
 
     /**
-     * Create gateway completeAuthorize.
+     * Handle return from off-site gateways after authorization
      *
      * @param string $name
      *
@@ -191,7 +191,7 @@ class Processor
     }
 
     /**
-     * Create gateway capture.
+     * Request GET handler to capture an amount you have previously authorized.
      *
      * @param string $name
      *
@@ -212,7 +212,7 @@ class Processor
     }
 
     /**
-     * Submit gateway capture.
+     * Request POST handler to capture an amount you have previously authorized.
      *
      * @param Request $request
      * @param string  $name
@@ -244,7 +244,7 @@ class Processor
     }
 
     /**
-     * Create gateway purchase.
+     * Request GET handler to authorize and immediately capture an amount on the customer's card.
      *
      * @param Request $request
      * @param string  $name
@@ -271,7 +271,7 @@ class Processor
     }
 
     /**
-     * Submit gateway purchase.
+     * Request POST handler to authorize and immediately capture an amount on the customer's card.
      *
      * @param Request $request
      * @param string  $name
@@ -306,7 +306,7 @@ class Processor
     }
 
     /**
-     * Gateway purchase return.
+     * Handle return from off-site gateways after purchase.
      *
      * NOTE: This won't work for gateways which require an internet-accessible URL (yet)
      *

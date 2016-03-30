@@ -44,31 +44,30 @@ class Frontend implements ControllerProviderInterface
             ->bind('payments-settings')
         ;
 
-        // Create/submit gateway authorize
+        // Authorize an amount on the customer's card
         $ctr->match('/gateways/{name}/authorize', [$this, 'authorize'])
             ->method('GET|POST')
             ->bind('payments-authorize')
         ;
 
-        // Create gateway completeAuthorize
+        // Handle return from off-site gateways after authorization
         $ctr->get('/gateways/{name}/completeAuthorize', [$this, 'completeAuthorize'])
             ->bind('payments-completeAuthorize')
         ;
 
-        // Create/submit gateway capture
+        // Capture an amount you have previously authorized
         $ctr->match('/gateways/{name}/capture', [$this, 'capture'])
             ->method('GET|POST')
             ->bind('payments-capture')
         ;
 
-        // Create/submit gateway purchase
+        // Authorize and immediately capture an amount on the customer's card
         $ctr->match('/gateways/{name}/purchase', [$this, 'purchase'])
             ->method('GET|POST')
             ->bind('payments-purchase')
         ;
 
-        // Gateway purchase return
-        // this won't work for gateways which require an internet-accessible URL (yet)
+        // Handle return from off-site gateways after purchase
         $ctr->match('/gateways/{name}/completePurchase', [$this, 'completePurchase'])
             ->method('GET|POST')
             ->bind('payments-purchase-complete')
@@ -132,7 +131,7 @@ class Frontend implements ControllerProviderInterface
     }
 
     /**
-     * Create/submit gateway authorize.
+     * Authorize an amount on the customer's card
      *
      * @param Application $app
      * @param Request     $request
@@ -154,7 +153,7 @@ class Frontend implements ControllerProviderInterface
     }
 
     /**
-     * Create gateway completeAuthorize.
+     * Handle return from off-site gateways after authorization
      *
      * @param Application $app\
      * @param string      $name
@@ -169,7 +168,7 @@ class Frontend implements ControllerProviderInterface
     }
 
     /**
-     * Create/Submit gateway capture.
+     * Capture an amount you have previously authorized.
      *
      * @param Application $app
      * @param Request     $request
@@ -191,7 +190,7 @@ class Frontend implements ControllerProviderInterface
     }
 
     /**
-     * Create/submit gateway purchase.
+     * Authorize and immediately capture an amount on the customer's card.
      *
      * @param Application $app
      * @param Request     $request
@@ -213,7 +212,7 @@ class Frontend implements ControllerProviderInterface
     }
 
     /**
-     * Gateway purchase return.
+     * Handle return from off-site gateways after purchase.
      *
      * NOTE: This won't work for gateways which require an internet-accessible URL (yet)
      *
