@@ -31,6 +31,7 @@ class Processor
     /**
      * Constructor.
      *
+     * @param Config          $config
      * @param TwigEnvironment $twig
      * @param Session         $session
      * @param EntityManager   $em
