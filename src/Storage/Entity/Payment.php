@@ -22,6 +22,8 @@ class Payment
     /** @var string */
     protected $currency;
     /** @var string */
+    protected $status;
+    /** @var string */
     protected $description;
 
     /**
@@ -118,6 +120,22 @@ class Payment
     public function setCurrency($currency)
     {
         $this->currency = $currency;
+    }
+
+    /**
+     * @return string
+     */
+    public function getStatus()
+    {
+        return $this->status;
+    }
+
+    /**
+     * @param string $status
+     */
+    public function setStatus($status)
+    {
+        $this->status = $status;
     }
 
     /**
