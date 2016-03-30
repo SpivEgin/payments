@@ -65,43 +65,23 @@ class Transaction implements \ArrayAccess
     /**
      * Create a new instance.
      *
-     * @param float  $amount
-     * @param string $currency
-     * @param string $description
-     * @param string $transactionId
-     * @param string $transactionReference
-     * @param string $cardReference
-     * @param string $returnUrl
-     * @param string $cancelUrl
-     * @param string $notifyUrl
-     * @param string $issuer
+     * @param array $params
      *
      * @return Transaction
      */
-    public static function create(
-        $amount,
-        $currency,
-        $description,
-        $transactionId,
-        $transactionReference,
-        $cardReference,
-        $returnUrl,
-        $cancelUrl,
-        $notifyUrl,
-        $issuer
-    )
+    public static function create(array $params)
     {
         $class = new self();
-        $class->setAmount($amount);
-        $class->setCurrency($currency);
-        $class->setDescription($description);
-        $class->setTransactionId($transactionId);
-        $class->setTransactionReference($transactionReference);
-        $class->setCardReference($cardReference);
-        $class->setReturnUrl($returnUrl);
-        $class->setCancelUrl($cancelUrl);
-        $class->setNotifyUrl($notifyUrl);
-        $class->setIssuer($issuer);
+        $class->setAmount($params['amount']);
+        $class->setCurrency($params['currency']);
+        $class->setDescription($params['description']);
+        $class->setTransactionId($params['transactionId']);
+        $class->setTransactionReference($params['transactionReference']);
+        $class->setCardReference($params['cardReference']);
+        $class->setReturnUrl($params['returnUrl']);
+        $class->setCancelUrl($params['cancelUrl']);
+        $class->setNotifyUrl($params['notifyUrl']);
+        $class->setIssuer($params['issuer']);
 
         return $class;
     }
