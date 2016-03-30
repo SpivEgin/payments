@@ -93,17 +93,9 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                                 );
                             }
                         ),
-                        'billing_address'  => $app->share(
+                        'address'  => $app->share(
                             function () use ($app) {
-                                return new Form\BillingAddressForm(
-                                    $app['form.factory'],
-                                    $app['payments.form.components']['type']['address']
-                                );
-                            }
-                        ),
-                        'shipping_address' => $app->share(
-                            function () use ($app) {
-                                return new Form\ShippingAddressForm(
+                                return new Form\AddressForm(
                                     $app['form.factory'],
                                     $app['payments.form.components']['type']['address']
                                 );
