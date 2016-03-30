@@ -62,7 +62,8 @@ class Frontend implements ControllerProviderInterface
         ;
 
         // Create/submit gateway purchase
-        $ctr->get('/gateways/{name}/purchase', [$this, 'purchase'])
+        $ctr->match('/gateways/{name}/purchase', [$this, 'purchase'])
+            ->method('GET|POST')
             ->bind('payments-purchase')
         ;
 
@@ -189,6 +190,15 @@ class Frontend implements ControllerProviderInterface
         return new Response($html);
     }
 
+    /**
+     * Create/submit gateway purchase.
+     *
+     * @param Application $app
+     * @param Request     $request
+     * @param string      $name
+     *
+     * @return Response
+     */
     public function purchase(Application $app, Request $request, $name)
     {
         if ($request->isMethod('POST')) {
