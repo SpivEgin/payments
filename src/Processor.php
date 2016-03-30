@@ -3,10 +3,13 @@
 namespace Bolt\Extension\Bolt\Payments;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
+use Bolt\Extension\Bolt\Payments\Exception\GenericException;
+use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
 use Bolt\Storage\EntityManager;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
 use Omnipay\Common\GatewayFactory;
+use Omnipay\Common\Message\RedirectResponseInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -158,8 +161,24 @@ class Processor
 
         $params['card'] = $card;
         $params['clientIp'] = $request->getClientIp();
+
+        try {
+            $response = $gateway->authorize($params)->send();
+        } catch (\Exception $e) {
+            throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
+        }
+
+        if ($response->isSuccessful()) {
+
+        } elseif ($response->isRedirect()) {
+            /** @var RedirectResponseInterface $response */
+            $response->redirect();
+        } else {
+            throw new ProcessorException($response->getMessage());
+        }
+
         $context = [
-            'response' => $gateway->authorize($params)->send(),
+            'response' => $response,
         ];
 
         return $this->render($gateway, 'response.twig', $context);
@@ -183,8 +202,24 @@ class Processor
         $gateway->initialize((array) $this->session->get($sessionVar));
 
         $params = $this->session->get($sessionVar . '.authorize');
+
+        try {
+            $response = $gateway->completeAuthorize($params)->send();
+        } catch (\Exception $e) {
+            throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
+        }
+
+        if ($response->isSuccessful()) {
+
+        } elseif ($response->isRedirect()) {
+            /** @var RedirectResponseInterface $response */
+            $response->redirect();
+        } else {
+            throw new ProcessorException($response->getMessage());
+        }
+
         $context = [
-            'response' => $gateway->completeAuthorize($params)->send(),
+            'response' => $response,
         ];
 
         return $this->render($gateway, 'response.twig', $context);
@@ -236,8 +271,24 @@ class Processor
         $this->session->set($sessionVar . '.capture', $params);
 
         $params['clientIp'] = $request->getClientIp();
+
+        try {
+            $response = $gateway->capture($params)->send();
+        } catch (\Exception $e) {
+            throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
+        }
+
+        if ($response->isSuccessful()) {
+
+        } elseif ($response->isRedirect()) {
+            /** @var RedirectResponseInterface $response */
+            $response->redirect();
+        } else {
+            throw new ProcessorException($response->getMessage());
+        }
+
         $context = [
-            'response' => $gateway->capture($params)->send(),
+            'response' => $response,
         ];
 
         return $this->render($gateway, 'response.twig', $context);
@@ -298,8 +349,24 @@ class Processor
 
         $params['card'] = $card;
         $params['clientIp'] = $request->getClientIp();
+
+        try {
+            $response = $gateway->purchase($params)->send();
+        } catch (\Exception $e) {
+            throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
+        }
+
+        if ($response->isSuccessful()) {
+
+        } elseif ($response->isRedirect()) {
+            /** @var RedirectResponseInterface $response */
+            $response->redirect();
+        } else {
+            throw new ProcessorException($response->getMessage());
+        }
+
         $context = [
-            'response' => $gateway->purchase($params)->send(),
+            'response' => $response,
         ];
 
         return $this->render($gateway, 'response.twig', $context);
@@ -327,10 +394,25 @@ class Processor
 
         // load request data from session
         $params = $this->session->get($sessionVar . '.purchase', []);
-
         $params['clientIp'] = $request->getClientIp();
+
+        try {
+            $response = $gateway->completePurchase($params)->send();
+        } catch (\Exception $e) {
+            throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
+        }
+
+        if ($response->isSuccessful()) {
+
+        } elseif ($response->isRedirect()) {
+            /** @var RedirectResponseInterface $response */
+            $response->redirect();
+        } else {
+            throw new ProcessorException($response->getMessage());
+        }
+
         $context = [
-            'response' => $gateway->completePurchase($params)->send(),
+            'response' => $response,
         ];
 
         return $this->render($gateway, 'response.twig', $context);
@@ -387,8 +469,24 @@ class Processor
 
         $params['card'] = $card;
         $params['clientIp'] = $request->getClientIp();
+
+        try {
+            $response = $gateway->createCard($params)->send();
+        } catch (\Exception $e) {
+            throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
+        }
+
+        if ($response->isSuccessful()) {
+
+        } elseif ($response->isRedirect()) {
+            /** @var RedirectResponseInterface $response */
+            $response->redirect();
+        } else {
+            throw new ProcessorException($response->getMessage());
+        }
+
         $context = [
-            'response' => $gateway->createCard($params)->send(),
+            'response' => $response,
         ];
 
         return $this->render($gateway, 'response.twig', $context);
@@ -445,8 +543,24 @@ class Processor
 
         $params['card'] = $card;
         $params['clientIp'] = $request->getClientIp();
+
+        try {
+            $response = $gateway->updateCard($params)->send();
+        } catch (\Exception $e) {
+            throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
+        }
+
+        if ($response->isSuccessful()) {
+
+        } elseif ($response->isRedirect()) {
+            /** @var RedirectResponseInterface $response */
+            $response->redirect();
+        } else {
+            throw new ProcessorException($response->getMessage());
+        }
+
         $context = [
-            'response' => $gateway->updateCard($params)->send(),
+            'response' => $response,
         ];
 
         return $this->render($gateway, 'response.twig', $context);
@@ -498,8 +612,24 @@ class Processor
         $this->session->set($sessionVar . '.delete', $params);
 
         $params['clientIp'] = $request->getClientIp();
+
+        try {
+            $response = $gateway->deleteCard($params)->send();
+        } catch (\Exception $e) {
+            throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
+        }
+
+        if ($response->isSuccessful()) {
+
+        } elseif ($response->isRedirect()) {
+            /** @var RedirectResponseInterface $response */
+            $response->redirect();
+        } else {
+            throw new ProcessorException($response->getMessage());
+        }
+
         $context = [
-            'response' => $gateway->deleteCard($params)->send(),
+            'response' => $response,
         ];
 
         return $this->render($gateway, 'response.twig', $context);
