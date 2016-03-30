@@ -112,20 +112,6 @@ class PaymentsServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app['payments.schema.table'] = $app->share(
-            function () use ($app) {
-                /** @var \Doctrine\DBAL\Platforms\AbstractPlatform $platform */
-                $platform = $app['db']->getDatabasePlatform();
-                $prefix = $app['schema.prefix'];
-
-                // @codingStandardsIgnoreStart
-                return new Container([
-                    'payment' => $app->share(function () use ($platform, $prefix) { return new Storage\Schema\Table\Payment($platform, $prefix); }),
-                ]);
-                // @codingStandardsIgnoreEnd
-            }
-        );
-
         $app['payments.records'] = $app->share(
             function ($app) {
                 /** @var Storage\Repository\Payment $repo */
