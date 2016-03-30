@@ -6,7 +6,7 @@ use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
 use Bolt\Extension\Bolt\Payments\Form;
 use Bolt\Extension\Bolt\Payments\Processor;
-use Bolt\Extension\Bolt\Payments\Storage\Schema\Table;
+use Bolt\Extension\Bolt\Payments\Storage;
 use Pimple as Container;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -120,9 +120,18 @@ class PaymentsServiceProvider implements ServiceProviderInterface
 
                 // @codingStandardsIgnoreStart
                 return new Container([
-                    'payment' => $app->share(function () use ($platform, $prefix) { return new Table\Payment($platform, $prefix); }),
+                    'payment' => $app->share(function () use ($platform, $prefix) { return new Storage\Schema\Table\Payment($platform, $prefix); }),
                 ]);
                 // @codingStandardsIgnoreEnd
+            }
+        );
+
+        $app['payments.records'] = $app->share(
+            function ($app) {
+                /** @var Storage\Repository\Payment $repo */
+                $repo = $app['storage']->getRepository(Storage\Entity\Payment::class);
+
+                return new Storage\Records($repo);
             }
         );
     }
