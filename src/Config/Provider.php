@@ -65,7 +65,7 @@ class Provider
      */
     public function __construct(array $config)
     {
-        $config = Arr::mergeRecursiveDistinct($config, $this->getDefaults());
+        $config = Arr::mergeRecursiveDistinct($this->getDefaults(), $config);
 
         $this->authorizenet = $config['providers']['authorizenet'];
         $this->buckaroo = $config['providers']['buckaroo'];
