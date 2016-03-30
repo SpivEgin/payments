@@ -45,15 +45,22 @@ class Processor
     }
 
     /**
+     * Get a configured gateway object.
+     *
      * @param $name
      *
      * @return CombinedGatewayInterface
      */
     private function getGateway($name)
     {
+        $providerConfig = $this->config->getProviders()->get($name);
         $name = Helper::resolveGateway($name);
+        $gateway = (new GatewayFactory())
+            ->create($name)
+            ->initialize($providerConfig)
+        ;
 
-        return (new GatewayFactory())->create($name);
+        return $gateway;
     }
 
     /**
