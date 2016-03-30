@@ -51,6 +51,8 @@ class Processor
      */
     private function getGateway($name)
     {
+        $name = Helper::resolveGateway($name);
+
         return (new GatewayFactory())->create($name);
     }
 
