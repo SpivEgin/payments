@@ -9,6 +9,7 @@ use Bolt\Extension\Bolt\Payments\Storage\Records;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
 use Omnipay\Common\Message\RedirectResponseInterface;
+use Omnipay\Common\Message\ResponseInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -162,6 +163,7 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
+            /** @var ResponseInterface $response */
             $response = $gateway->authorize((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
@@ -202,6 +204,7 @@ class TransactionProcessor
         $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE);
 
         try {
+            /** @var ResponseInterface $response */
             $response = $gateway->completeAuthorize($transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
@@ -268,6 +271,7 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_CAPTURE, $transation);
 
         try {
+            /** @var ResponseInterface $response */
             $response = $gateway->capture((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
@@ -351,6 +355,7 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
+            /** @var ResponseInterface $response */
             $response = $gateway->purchase((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
@@ -397,6 +402,7 @@ class TransactionProcessor
         $transation->setClientIp($request->getClientIp());
 
         try {
+            /** @var ResponseInterface $response */
             $response = $gateway->completePurchase((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
@@ -475,6 +481,7 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
+            /** @var ResponseInterface $response */
             $response = $gateway->createCard((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
@@ -553,6 +560,7 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
+            /** @var ResponseInterface $response */
             $response = $gateway->updateCard((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
@@ -622,6 +630,7 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_DELETE, $transation);
 
         try {
+            /** @var ResponseInterface $response */
             $response = $gateway->deleteCard((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
