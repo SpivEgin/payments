@@ -10,6 +10,7 @@ use Bolt\Extension\Bolt\Payments\Storage;
 use Bolt\Extension\ConfigTrait;
 use Bolt\Extension\ControllerMountTrait;
 use Bolt\Extension\DatabaseSchemaTrait;
+use Bolt\Extension\StorageTrait;
 use Bolt\Extension\TwigTrait;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -25,6 +26,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
     use ConfigTrait;
     use ControllerMountTrait;
     use DatabaseSchemaTrait;
+    use StorageTrait;
     use TwigTrait;
 
     /**
@@ -32,8 +34,9 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
      */
     public function register(Application $app)
     {
-        $this->extendTwigService();
         $this->extendDatabaseSchemaServices();
+        $this->extendRepositoryMapping();
+        $this->extendTwigService();
     }
 
     /**
@@ -108,7 +111,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
     protected function registerRepositoryMappings()
     {
         return [
-            'payment' => Storage\Entity\Payment::class,
+            'payment' => [Storage\Entity\Payment::class => Storage\Repository\Payment::class],
         ];
     }
 

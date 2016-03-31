@@ -6,7 +6,6 @@ use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Exception\GenericException;
 use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
 use Bolt\Extension\Bolt\Payments\Storage\Records;
-use Bolt\Storage\EntityManager;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
 use Omnipay\Common\GatewayFactory;
@@ -36,9 +35,9 @@ class Processor
      * Constructor.
      *
      * @param Config          $config
+     * @param Records         $records
      * @param TwigEnvironment $twig
      * @param Session         $session
-     * @param EntityManager   $em
      */
     public function __construct(Config $config, Records $records, TwigEnvironment $twig, Session $session)
     {
@@ -140,6 +139,8 @@ class Processor
      * @param Request $request
      * @param string  $name
      *
+     * @throws GenericException
+     *
      * @return string
      */
     public function setAuthorize(Request $request, $name)
@@ -189,6 +190,8 @@ class Processor
      * Handle return from off-site gateways after authorization
      *
      * @param string $name
+     *
+     * @throws GenericException
      *
      * @return string
      */
@@ -252,6 +255,8 @@ class Processor
      *
      * @param Request $request
      * @param string  $name
+     *
+     * @throws GenericException
      *
      * @return string
      */
@@ -328,6 +333,8 @@ class Processor
      * @param Request $request
      * @param string  $name
      *
+     * @throws GenericException
+     *
      * @return string
      */
     public function setPurchase(Request $request, $name)
@@ -380,6 +387,8 @@ class Processor
      *
      * @param Request $request
      * @param string  $name
+     *
+     * @throws GenericException
      *
      * @return string
      */
@@ -447,6 +456,8 @@ class Processor
      *
      * @param Request $request
      * @param string  $name
+     *
+     * @throws GenericException
      *
      * @return string
      */
@@ -522,6 +533,8 @@ class Processor
      * @param Request $request
      * @param string  $name
      *
+     * @throws GenericException
+     *
      * @return string
      */
     public function setUpdateCard(Request $request, $name)
@@ -593,6 +606,8 @@ class Processor
      *
      * @param Request $request
      * @param string  $name
+     *
+     * @throws GenericException
      *
      * @return string
      */
