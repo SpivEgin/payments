@@ -37,6 +37,20 @@ class Transaction implements \ArrayAccess
     protected $clientIp;
 
     /**
+     * Constructor.
+     *
+     * @param array $params
+     */
+    public function __construct(array $params = [])
+    {
+        foreach ($params as $name => $value) {
+            if (property_exists($this, $name)) {
+                $this->{$name} = $value;
+            }
+        }
+    }
+
+    /**
      * @inheritDoc
      */
     public function offsetExists($offset)

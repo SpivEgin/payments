@@ -8,7 +8,6 @@ use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
 use Bolt\Extension\Bolt\Payments\Storage\Records;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
-use Omnipay\Common\GatewayFactory;
 use Omnipay\Common\Message\RedirectResponseInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
@@ -20,8 +19,16 @@ use Twig_Environment as TwigEnvironment;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class Processor
+class TransactionProcessor
 {
+    const TYPE_AUTHORIZE = 'authorize';
+    const TYPE_CAPTURE = 'capture';
+    const TYPE_CARD = 'card';
+    const TYPE_CREATE = 'create';
+    const TYPE_DELETE = 'delete';
+    const TYPE_PURCHASE = 'purchase';
+    const TYPE_UPDATE = 'update';
+
     /** @var Config */
     protected $config;
     /** @var Records */
@@ -32,6 +39,8 @@ class Processor
     protected $session;
     /** @var string */
     protected $baseUrl;
+    /** @var GatewayManager */
+    protected $gatewayManager;
 
     /**
      * Constructor.
@@ -49,25 +58,8 @@ class Processor
         $this->twig = $twig;
         $this->session = $session;
         $this->baseUrl = $baseUrl;
-    }
 
-    /**
-     * Get a configured gateway object.
-     *
-     * @param $name
-     *
-     * @return CombinedGatewayInterface
-     */
-    private function getGateway($name)
-    {
-        $providerConfig = $this->config->getProviders()->get($name);
-        $name = Helper::resolveGateway($name);
-        $gateway = (new GatewayFactory())
-            ->create($name)
-            ->initialize($providerConfig)
-        ;
-
-        return $gateway;
+        $this->gatewayManager = new GatewayManager($config, $session);
     }
 
     /**
@@ -79,9 +71,7 @@ class Processor
      */
     public function getSettings($name)
     {
-        $gateway = $this->getGateway($name);
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         $context = [
             'settings' => $gateway->getParameters(),
         ];
@@ -99,12 +89,10 @@ class Processor
      */
     public function setSettings(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $request->request->get('gateway'));
+        $gateway = $this->gatewayManager->initializeRequestGateway($name, $request);
 
         // save gateway settings in session
-        $this->session->set($sessionVar, $gateway->getParameters());
+        $this->gatewayManager->setSessionValue(null, $name, $gateway->getParameters());
 
         // redirect back to gateway settings page
         $this->session->getFlashBag()->add('success', 'Gateway settings updated!');
@@ -120,14 +108,14 @@ class Processor
      */
     public function getAuthorize(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
-        $card = new CreditCard($this->session->get($sessionVar . '.card'));
-        /** @var Transaction $params */
-        $params = $this->session->get($sessionVar . '.authorize', new Transaction());
-        $params
+        $cardData = $this->gatewayManager->getSessionValue($name, static::TYPE_CARD);
+        $card = new CreditCard($cardData);
+
+        /** @var Transaction $transation */
+        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE, new Transaction());
+        $transation
             ->setReturnUrl($this->getInternalUrl($name, 'completeAuthorize'))
             ->setCancelUrl($request->getUri())
             ->setCard($card)
@@ -135,8 +123,8 @@ class Processor
 
         $context = [
             'method'  => 'authorize',
-            'params'  => $params,
-            'card'    => $params->getCard()->getParameters(),
+            'params'  => $transation,
+            'card'    => $transation->getCard()->getParameters(),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -154,29 +142,27 @@ class Processor
      */
     public function setAuthorize(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsAuthorize()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "authorize".', $name));
         }
 
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
-
         // load POST data
         $card = new CreditCard($request->request->get('card'));
-        /** @var Transaction $params */
+
         $params = $request->request->get('params');
-        $params
+        $transation = new Transaction($params);
+        $transation
             ->setClientIp($request->getClientIp())
             ->setCard($card)
         ;
 
         // save POST data into session
-        $this->session->set($sessionVar . '.authorize', $params);
-        $this->session->set($sessionVar . '.card', $card);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_AUTHORIZE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
-            $response = $gateway->authorize((array) $params)->send();
+            $response = $gateway->authorize((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -208,18 +194,15 @@ class Processor
      */
     public function completeAuthorize($name)
     {
-        $gateway = $this->getGateway($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsCompleteAuthorize()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "completeAuthorize".', $name));
         }
 
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
-
-        $params = $this->session->get($sessionVar . '.authorize');
+        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE);
 
         try {
-            $response = $gateway->completeAuthorize($params)->send();
+            $response = $gateway->completeAuthorize($transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -249,13 +232,11 @@ class Processor
      */
     public function getCapture($name)
     {
-        $gateway = $this->getGateway($name);
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
         $context = [
             'method'  => 'capture',
-            'params'  => $this->session->get($sessionVar . '.capture', new Transaction()),
+            'params'  => $this->gatewayManager->getSessionValue($name, static::TYPE_CAPTURE, new Transaction()),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -273,24 +254,21 @@ class Processor
      */
     public function setCapture(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsCapture()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "capture".', $name));
         }
 
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
-
         // load POST data
-        /** @var Transaction $params */
         $params = $request->request->get('params');
-        $params->setClientIp($request->getClientIp());
+        $transation = new Transaction($params);
+        $transation->setClientIp($request->getClientIp());
 
         // save POST data into session
-        $this->session->set($sessionVar . '.capture', $params);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CAPTURE, $transation);
 
         try {
-            $response = $gateway->capture((array) $params)->send();
+            $response = $gateway->capture((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -321,14 +299,12 @@ class Processor
      */
     public function getPurchase(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
-        $card = new CreditCard($this->session->get($sessionVar . '.card'));
-        /** @var Transaction $params */
-        $params = $this->session->get($sessionVar . '.purchase', new Transaction());
-        $params
+        $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
+        /** @var Transaction $transation */
+        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
+        $transation
             ->setReturnUrl($this->getInternalUrl($name, 'completePurchase'))
             ->setCancelUrl($request->getUri())
             ->setCard($card)
@@ -336,8 +312,8 @@ class Processor
 
         $context = [
             'method'  => 'purchase',
-            'params'  => $params,
-            'card'    => $params->getCard()->getParameters(),
+            'params'  => $transation,
+            'card'    => $transation->getCard()->getParameters(),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -355,29 +331,27 @@ class Processor
      */
     public function setPurchase(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsPurchase()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "purchase".', $name));
         }
 
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
-
         // load POST data
         $card = new CreditCard($request->request->get('card'));
-        /** @var Transaction $params */
+
         $params = $request->request->get('params');
-        $params
+        $transation = new Transaction($params);
+        $transation
             ->setCard($card)
             ->setClientIp($request->getClientIp())
         ;
 
         // save POST data into session
-        $this->session->set($sessionVar . '.purchase', $params);
-        $this->session->set($sessionVar . '.card', $card);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
-            $response = $gateway->purchase((array) $params)->send();
+            $response = $gateway->purchase((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -412,21 +386,18 @@ class Processor
      */
     public function completePurchase(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsCompletePurchase()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "completePurchase".', $name));
         }
 
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
-
         // load request data from session
-        /** @var Transaction $params */
-        $params = $this->session->get($sessionVar . '.purchase', new Transaction());
-        $params->setClientIp($request->getClientIp());
+        /** @var Transaction $transation */
+        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
+        $transation->setClientIp($request->getClientIp());
 
         try {
-            $response = $gateway->completePurchase((array) $params)->send();
+            $response = $gateway->completePurchase((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -456,19 +427,17 @@ class Processor
      */
     public function getCreateCard($name)
     {
-        $gateway = $this->getGateway($name);
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
-        $card = new CreditCard($this->session->get($sessionVar . '.card'));
-        /** @var Transaction $params */
-        $params = $this->session->get($sessionVar . '.create', new Transaction());
-        $params->setCard($card);
+        $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
+        /** @var Transaction $transation */
+        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_CREATE, new Transaction());
+        $transation->setCard($card);
 
         $context = [
             'method'  => 'createCard',
-            'params'  => $params,
-            'card'    => $params->getCard()->getParameters(),
+            'params'  => $transation,
+            'card'    => $transation->getCard()->getParameters(),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -486,28 +455,27 @@ class Processor
      */
     public function setCreateCard(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsCreateCard()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "createCard".', $name));
         }
 
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
 
         // load POST data
         $card = new CreditCard($request->request->get('card'));
         $params = $request->request->get('params');
-        $params
+        $transation = new Transaction($params);
+        $transation
             ->setCard($card)
             ->setClientIp($request->getClientIp())
         ;
 
         // save POST data into session
-        $this->session->set($sessionVar . '.create', $params);
-        $this->session->set($sessionVar . '.card', $card);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CREATE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
-            $response = $gateway->createCard($params)->send();
+            $response = $gateway->createCard((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -537,19 +505,17 @@ class Processor
      */
     public function getUpdateCard($name)
     {
-        $gateway = $this->getGateway($name);
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
-        $card = new CreditCard($this->session->get($sessionVar . '.card'));
-        /** @var Transaction $params */
-        $params = $this->session->get($sessionVar . '.update', new Transaction());
-        $params->setCard($card);
+        $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
+        /** @var Transaction $transation */
+        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_UPDATE, new Transaction());
+        $transation->setCard($card);
 
         $context = [
             'method'  => 'updateCard',
-            'params'  => $params,
-            'card'    => $params->getCard()->getParameters(),
+            'params'  => $transation,
+            'card'    => $transation->getCard()->getParameters(),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -567,29 +533,27 @@ class Processor
      */
     public function setUpdateCard(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsUpdateCard()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "updateCard".', $name));
         }
-
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
 
         // load POST data
         $card = new CreditCard($request->request->get('card'));
 
         $params = $request->request->get('params');
-        $params
+        $transation = new Transaction($params);
+        $transation
             ->setCard($card)
             ->setClientIp($request->getClientIp())
         ;
 
         // save POST data into session
-        $this->session->set($sessionVar . '.update', $params);
-        $this->session->set($sessionVar . '.card', $card);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_UPDATE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
-            $response = $gateway->updateCard((array) $params)->send();
+            $response = $gateway->updateCard((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -619,16 +583,14 @@ class Processor
      */
     public function getDeleteCard($name)
     {
-        $gateway = $this->getGateway($name);
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
-        /** @var Transaction $params */
-        $params = $this->session->get($sessionVar . '.delete', new Transaction());
+        /** @var Transaction $transation */
+        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_DELETE, new Transaction());
 
         $context = [
             'method'  => 'deleteCard',
-            'params'  => $params,
+            'params'  => $transation,
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -646,23 +608,21 @@ class Processor
      */
     public function setDeleteCard(Request $request, $name)
     {
-        $gateway = $this->getGateway($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsDeleteCard()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "deleteCard".', $name));
         }
 
-        $sessionVar = 'omnipay.' . $gateway->getShortName();
-        $gateway->initialize((array) $this->session->get($sessionVar));
-
         // load POST data
-        $params = $request->request->get('params');
-        $params->setClientIp($request->getClientIp());
+        $params = $request->request->get('params', []);
+        $transation = new Transaction($params);
+        $transation->setClientIp($request->getClientIp());
 
         // save POST data into session
-        $this->session->set($sessionVar . '.delete', $params);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_DELETE, $transation);
 
         try {
-            $response = $gateway->deleteCard($params)->send();
+            $response = $gateway->deleteCard((array) $transation)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
