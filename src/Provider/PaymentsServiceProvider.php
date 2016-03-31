@@ -44,12 +44,18 @@ class PaymentsServiceProvider implements ServiceProviderInterface
 
         $app['payments.processor'] = $app->share(
             function ($app) {
+                $baseUrl = sprintf(
+                    '%s%s',
+                    $app['resources']->getUrl('rooturl'),
+                    $this->config['mountpoint']
+                );
+
                 return new Processor(
                     $app['payments.config'],
                     $app['payments.records'],
                     $app['twig'],
                     $app['session'],
-                    $app['payments.form']
+                    $baseUrl
                 );
             }
         );

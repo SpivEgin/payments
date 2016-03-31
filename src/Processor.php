@@ -30,6 +30,8 @@ class Processor
     protected $twig;
     /** @var Session */
     protected $session;
+    /** @var string */
+    protected $baseUrl;
 
     /**
      * Constructor.
@@ -38,13 +40,15 @@ class Processor
      * @param Records         $records
      * @param TwigEnvironment $twig
      * @param Session         $session
+     * @param string          $baseUrl
      */
-    public function __construct(Config $config, Records $records, TwigEnvironment $twig, Session $session)
+    public function __construct(Config $config, Records $records, TwigEnvironment $twig, Session $session, $baseUrl)
     {
         $this->config = $config;
         $this->records = $records;
         $this->twig = $twig;
         $this->session = $session;
+        $this->baseUrl = $baseUrl;
     }
 
     /**
@@ -121,7 +125,7 @@ class Processor
         $gateway->initialize((array) $this->session->get($sessionVar));
 
         $params = $this->session->get($sessionVar . '.authorize', []);
-        $params['returnUrl'] = str_replace('/authorize', '/completeAuthorize', $request->getUri());
+        $params['returnUrl'] = $this->getInternalUrl($name, 'completeAuthorize');
         $params['cancelUrl'] = $request->getUri();
         $card = new CreditCard($this->session->get($sessionVar . '.card'));
         $context = [
@@ -315,7 +319,7 @@ class Processor
         $gateway->initialize((array) $this->session->get($sessionVar));
 
         $params = $this->session->get($sessionVar . '.purchase', []);
-        $params['returnUrl'] = str_replace('/purchase', '/completePurchase', $request->getUri());
+        $params['returnUrl'] = $this->getInternalUrl($name, 'completePurchase');
         $params['cancelUrl'] = $request->getUri();
         $card = new CreditCard($this->session->get($sessionVar . '.card'));
         $context = [
@@ -663,11 +667,24 @@ class Processor
     protected function render($gateway, $template, array $context = [])
     {
         $context += [
-            'baseurl'  => $this->config->getMountpoint(),
+            'baseurl'  => $this->baseUrl,
             'gateway'  => $gateway,
             'settings' => $gateway->getParameters(),
         ];
 
         return $this->twig->render($template, $context);
+    }
+
+    /**
+     * Construct an internal payments URL.
+     *
+     * @param string $provider
+     * @param string $routeName
+     *
+     * @return string
+     */
+    protected function getInternalUrl($provider, $routeName)
+    {
+        return sprintf('%s/gateways/%s/%s', $this->baseUrl, $provider, $routeName);
     }
 }
