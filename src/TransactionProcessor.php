@@ -114,9 +114,9 @@ class TransactionProcessor
         $cardData = $this->gatewayManager->getSessionValue($name, static::TYPE_CARD);
         $card = new CreditCard($cardData);
 
-        /** @var Transaction $transation */
-        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE, new Transaction());
-        $transation
+        /** @var Transaction $transaction */
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE, new Transaction());
+        $transaction
             ->setReturnUrl($this->getInternalUrl($name, 'completeAuthorize'))
             ->setCancelUrl($request->getUri())
             ->setCard($card)
@@ -124,8 +124,8 @@ class TransactionProcessor
 
         $context = [
             'method'  => 'authorize',
-            'params'  => $transation,
-            'card'    => $transation->getCard()->getParameters(),
+            'params'  => $transaction,
+            'card'    => $transaction->getCard()->getParameters(),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -152,19 +152,19 @@ class TransactionProcessor
         $card = new CreditCard($request->request->get('card'));
 
         $params = $request->request->get('params');
-        $transation = new Transaction($params);
-        $transation
+        $transaction = new Transaction($params);
+        $transaction
             ->setClientIp($request->getClientIp())
             ->setCard($card)
         ;
 
         // save POST data into session
-        $this->gatewayManager->setSessionValue($name, static::TYPE_AUTHORIZE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_AUTHORIZE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->authorize((array) $transation)->send();
+            $response = $gateway->authorize((array) $transaction)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -201,11 +201,11 @@ class TransactionProcessor
             throw new RuntimeException(sprintf('Gateway %s does not support "completeAuthorize".', $name));
         }
 
-        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE);
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE);
 
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->completeAuthorize($transation)->send();
+            $response = $gateway->completeAuthorize($transaction)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -264,15 +264,15 @@ class TransactionProcessor
 
         // load POST data
         $params = $request->request->get('params');
-        $transation = new Transaction($params);
-        $transation->setClientIp($request->getClientIp());
+        $transaction = new Transaction($params);
+        $transaction->setClientIp($request->getClientIp());
 
         // save POST data into session
-        $this->gatewayManager->setSessionValue($name, static::TYPE_CAPTURE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CAPTURE, $transaction);
 
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->capture((array) $transation)->send();
+            $response = $gateway->capture((array) $transaction)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -306,9 +306,9 @@ class TransactionProcessor
         $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
-        /** @var Transaction $transation */
-        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
-        $transation
+        /** @var Transaction $transaction */
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
+        $transaction
             ->setReturnUrl($this->getInternalUrl($name, 'completePurchase'))
             ->setCancelUrl($request->getUri())
             ->setCard($card)
@@ -316,8 +316,8 @@ class TransactionProcessor
 
         $context = [
             'method'  => 'purchase',
-            'params'  => $transation,
-            'card'    => $transation->getCard()->getParameters(),
+            'params'  => $transaction,
+            'card'    => $transaction->getCard()->getParameters(),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -344,19 +344,19 @@ class TransactionProcessor
         $card = new CreditCard($request->request->get('card'));
 
         $params = $request->request->get('params');
-        $transation = new Transaction($params);
-        $transation
+        $transaction = new Transaction($params);
+        $transaction
             ->setCard($card)
             ->setClientIp($request->getClientIp())
         ;
 
         // save POST data into session
-        $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->purchase((array) $transation)->send();
+            $response = $gateway->purchase((array) $transaction)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -397,13 +397,13 @@ class TransactionProcessor
         }
 
         // load request data from session
-        /** @var Transaction $transation */
-        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
-        $transation->setClientIp($request->getClientIp());
+        /** @var Transaction $transaction */
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
+        $transaction->setClientIp($request->getClientIp());
 
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->completePurchase((array) $transation)->send();
+            $response = $gateway->completePurchase((array) $transaction)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -436,14 +436,14 @@ class TransactionProcessor
         $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
-        /** @var Transaction $transation */
-        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_CREATE, new Transaction());
-        $transation->setCard($card);
+        /** @var Transaction $transaction */
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_CREATE, new Transaction());
+        $transaction->setCard($card);
 
         $context = [
             'method'  => 'createCard',
-            'params'  => $transation,
-            'card'    => $transation->getCard()->getParameters(),
+            'params'  => $transaction,
+            'card'    => $transaction->getCard()->getParameters(),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -470,19 +470,19 @@ class TransactionProcessor
         // load POST data
         $card = new CreditCard($request->request->get('card'));
         $params = $request->request->get('params');
-        $transation = new Transaction($params);
-        $transation
+        $transaction = new Transaction($params);
+        $transaction
             ->setCard($card)
             ->setClientIp($request->getClientIp())
         ;
 
         // save POST data into session
-        $this->gatewayManager->setSessionValue($name, static::TYPE_CREATE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CREATE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->createCard((array) $transation)->send();
+            $response = $gateway->createCard((array) $transaction)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -515,14 +515,14 @@ class TransactionProcessor
         $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
-        /** @var Transaction $transation */
-        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_UPDATE, new Transaction());
-        $transation->setCard($card);
+        /** @var Transaction $transaction */
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_UPDATE, new Transaction());
+        $transaction->setCard($card);
 
         $context = [
             'method'  => 'updateCard',
-            'params'  => $transation,
-            'card'    => $transation->getCard()->getParameters(),
+            'params'  => $transaction,
+            'card'    => $transaction->getCard()->getParameters(),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -549,19 +549,19 @@ class TransactionProcessor
         $card = new CreditCard($request->request->get('card'));
 
         $params = $request->request->get('params');
-        $transation = new Transaction($params);
-        $transation
+        $transaction = new Transaction($params);
+        $transaction
             ->setCard($card)
             ->setClientIp($request->getClientIp())
         ;
 
         // save POST data into session
-        $this->gatewayManager->setSessionValue($name, static::TYPE_UPDATE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_UPDATE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->updateCard((array) $transation)->send();
+            $response = $gateway->updateCard((array) $transaction)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -593,12 +593,12 @@ class TransactionProcessor
     {
         $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
-        /** @var Transaction $transation */
-        $transation = $this->gatewayManager->getSessionValue($name, static::TYPE_DELETE, new Transaction());
+        /** @var Transaction $transaction */
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_DELETE, new Transaction());
 
         $context = [
             'method'  => 'deleteCard',
-            'params'  => $transation,
+            'params'  => $transaction,
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -623,15 +623,15 @@ class TransactionProcessor
 
         // load POST data
         $params = $request->request->get('params', []);
-        $transation = new Transaction($params);
-        $transation->setClientIp($request->getClientIp());
+        $transaction = new Transaction($params);
+        $transaction->setClientIp($request->getClientIp());
 
         // save POST data into session
-        $this->gatewayManager->setSessionValue($name, static::TYPE_DELETE, $transation);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_DELETE, $transaction);
 
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->deleteCard((array) $transation)->send();
+            $response = $gateway->deleteCard((array) $transaction)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
