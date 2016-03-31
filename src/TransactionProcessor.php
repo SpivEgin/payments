@@ -162,9 +162,10 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_AUTHORIZE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
+        $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->authorize((array) $transaction)->send();
+            $response = $gateway->authorize((array) $params)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -202,10 +203,10 @@ class TransactionProcessor
         }
 
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE);
-
+        $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->completeAuthorize($transaction)->send();
+            $response = $gateway->completeAuthorize($params)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -270,9 +271,10 @@ class TransactionProcessor
         // save POST data into session
         $this->gatewayManager->setSessionValue($name, static::TYPE_CAPTURE, $transaction);
 
+        $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->capture((array) $transaction)->send();
+            $response = $gateway->capture((array) $params)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -313,6 +315,7 @@ class TransactionProcessor
             ->setCancelUrl($request->getUri())
             ->setCard($card)
         ;
+        $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
 
         $context = [
             'method'  => 'purchase',
@@ -344,7 +347,12 @@ class TransactionProcessor
         $card = new CreditCard($request->request->get('card'));
 
         $params = $request->request->get('params');
-        $transaction = new Transaction($params);
+
+        /** @var Transaction $transaction */
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE);
+        if ($transaction === null) {
+            throw new GenericException('Sorry, there was an error. Please try again later.');
+        }
         $transaction
             ->setCard($card)
             ->setClientIp($request->getClientIp())
@@ -354,10 +362,12 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
+        $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->purchase((array) $transaction)->send();
+            $response = $gateway->purchase((array) $params)->send();
         } catch (\Exception $e) {
+
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
 
@@ -401,9 +411,10 @@ class TransactionProcessor
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
         $transaction->setClientIp($request->getClientIp());
 
+        $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->completePurchase((array) $transaction)->send();
+            $response = $gateway->completePurchase((array) $params)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -480,9 +491,10 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_CREATE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
+        $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->createCard((array) $transaction)->send();
+            $response = $gateway->createCard((array) $params)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -559,9 +571,10 @@ class TransactionProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_UPDATE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
+        $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->updateCard((array) $transaction)->send();
+            $response = $gateway->updateCard((array) $params)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -629,9 +642,10 @@ class TransactionProcessor
         // save POST data into session
         $this->gatewayManager->setSessionValue($name, static::TYPE_DELETE, $transaction);
 
+        $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
-            $response = $gateway->deleteCard((array) $transaction)->send();
+            $response = $gateway->deleteCard((array) $params)->send();
         } catch (\Exception $e) {
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
@@ -683,5 +697,24 @@ class TransactionProcessor
     protected function getInternalUrl($provider, $routeName)
     {
         return sprintf('%s/gateways/%s/%s', $this->baseUrl, $provider, $routeName);
+    }
+
+    /**
+     * Return a combined array of parameters to be passed to the gateway.
+     *
+     * @param string      $name
+     * @param Transaction $transaction
+     *
+     * @return array
+     */
+    protected function getGatewayParameters($name, Transaction $transaction)
+    {
+        $params = (array) $this->config->getProviders()->get($name);
+        $props = array_keys($transaction->getProperties());
+        foreach ($props as $prop) {
+            $params[$prop] = $transaction[$prop];
+        }
+
+        return $params;
     }
 }

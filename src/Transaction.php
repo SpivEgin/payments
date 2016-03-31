@@ -51,6 +51,14 @@ class Transaction implements \ArrayAccess
     }
 
     /**
+     * @return string[]
+     */
+    public function getProperties()
+    {
+        return get_class_vars(self::class);
+    }
+
+    /**
      * @inheritDoc
      */
     public function offsetExists($offset)
@@ -63,7 +71,7 @@ class Transaction implements \ArrayAccess
      */
     public function offsetGet($offset)
     {
-        return $this->$offset;
+        return $this->{$offset};
     }
 
     /**
