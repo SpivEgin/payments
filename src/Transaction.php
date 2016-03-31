@@ -83,30 +83,6 @@ class Transaction implements \ArrayAccess
     }
 
     /**
-     * Create a new instance.
-     *
-     * @param array $params
-     *
-     * @return Transaction
-     */
-    public static function create(array $params)
-    {
-        $class = new self();
-        $class->setAmount($params['amount']);
-        $class->setCurrency($params['currency']);
-        $class->setDescription($params['description']);
-        $class->setTransactionId($params['transactionId']);
-        $class->setTransactionReference($params['transactionReference']);
-        $class->setCardReference($params['cardReference']);
-        $class->setReturnUrl($params['returnUrl']);
-        $class->setCancelUrl($params['cancelUrl']);
-        $class->setNotifyUrl($params['notifyUrl']);
-        $class->setIssuer($params['issuer']);
-
-        return $class;
-    }
-
-    /**
      * @return CreditCard
      */
     public function getCard()
