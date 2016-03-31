@@ -37,6 +37,33 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
         $this->extendDatabaseSchemaServices();
         $this->extendRepositoryMapping();
         $this->extendTwigService();
+
+        // Add the Twig Extension.
+        $app['twig'] = $app->share(
+            $app->extend(
+                'twig',
+                function (\Twig_Environment $twig, $app) {
+                    $twig->addExtension(
+                        new Twig\Functions($app['payments.config'], $app['session'])
+                    );
+
+                    return $twig;
+                }
+            )
+        );
+
+        $app['safe_twig'] = $app->share(
+            $app->extend(
+                'safe_twig',
+                function (\Twig_Environment $twig, $app) {
+                    $twig->addExtension(
+                        new Twig\Functions($app['payments.config'], $app['session'])
+                    );
+
+                    return $twig;
+                }
+            )
+        );
     }
 
     /**
