@@ -47,6 +47,8 @@
     "type": "bolt-extension",
     "require": {
         "bolt/bolt": "^3.0",
+        "bolt/boltforms": "^3.0@dev",
+        "bolt/members": "^3.0@dev",
         "guzzle/guzzle": "^3.9"
     },
     "license": "MIT",
