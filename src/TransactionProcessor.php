@@ -93,7 +93,7 @@ class TransactionProcessor
         $gateway = $this->gatewayManager->initializeRequestGateway($name, $request);
 
         // save gateway settings in session
-        $this->gatewayManager->setSessionValue(null, $name, $gateway->getParameters());
+        $this->gatewayManager->setSessionValue($name, $name, $gateway->getParameters());
 
         // redirect back to gateway settings page
         $this->session->getFlashBag()->add('success', 'Gateway settings updated!');
