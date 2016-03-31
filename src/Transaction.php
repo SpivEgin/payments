@@ -2,6 +2,8 @@
 
 namespace Bolt\Extension\Bolt\Payments;
 
+use Omnipay\Common\CreditCard;
+
 /**
  * Payment transaction object class.
  *
@@ -27,8 +29,12 @@ class Transaction implements \ArrayAccess
     protected $cancelUrl;
     /** @var string */
     protected $notifyUrl;
+    /** @var CreditCard */
+    protected $card;
     /** @var string */
     protected $issuer;
+    /** @var string */
+    protected $clientIp;
 
     /**
      * @inheritDoc
@@ -84,6 +90,26 @@ class Transaction implements \ArrayAccess
         $class->setIssuer($params['issuer']);
 
         return $class;
+    }
+
+    /**
+     * @return CreditCard
+     */
+    public function getCard()
+    {
+        return $this->card;
+    }
+
+    /**
+     * @param CreditCard $card
+     *
+     * @return Transaction
+     */
+    public function setCard(CreditCard $card)
+    {
+        $this->card = $card;
+
+        return $this;
     }
 
     /**
@@ -282,6 +308,26 @@ class Transaction implements \ArrayAccess
     public function setNotifyUrl($notifyUrl)
     {
         $this->notifyUrl = $notifyUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getClientIp()
+    {
+        return $this->clientIp;
+    }
+
+    /**
+     * @param mixed $clientIp
+     *
+     * @return Transaction
+     */
+    public function setClientIp($clientIp)
+    {
+        $this->clientIp = $clientIp;
 
         return $this;
     }
