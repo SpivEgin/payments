@@ -128,7 +128,8 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
     protected function registerExtensionTables()
     {
         return [
-            'payment' => Storage\Schema\Table\Payment::class,
+            'payment'       => Storage\Schema\Table\Payment::class,
+            'payment_audit' => Storage\Schema\Table\PaymentAuditEntry::class,
         ];
     }
 
@@ -138,7 +139,8 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
     protected function registerRepositoryMappings()
     {
         return [
-            'payment' => [Storage\Entity\Payment::class => Storage\Repository\Payment::class],
+            'payment'       => [Storage\Entity\Payment::class => Storage\Repository\Payment::class],
+            'payment_audit' => [Storage\Entity\PaymentAuditEntry::class => Storage\Repository\PaymentAuditEntry::class],
         ];
     }
 
