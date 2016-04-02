@@ -60,58 +60,6 @@ class PaymentsServiceProvider implements ServiceProviderInterface
             }
         );
 
-        $app['payments.form.components'] = $app->share(
-            function ($app) {
-                $type = new Container(
-                    [
-                        // @codingStandardsIgnoreStart
-                        'address'     => $app->share(function () use ($app) { return new Form\Type\AddressType($app['payments.config']); }),
-                        'credit_card' => $app->share(function () use ($app) { return new Form\Type\CreditCardType($app['payments.config']); }),
-                        // @codingStandardsIgnoreEnd
-                    ]
-                );
-                $entity = new Container(
-                    [
-                    ]
-                );
-                $constraint = new Container(
-                    [
-                    ]
-                );
-
-                return new Container([
-                    'type'       => $type,
-                    'entity'     => $entity,
-                    'constraint' => $constraint,
-                ]);
-            }
-        );
-
-        $app['payments.form'] = $app->share(
-            function ($app) {
-                return new Container(
-                    [
-                        'credit_card'      => $app->share(
-                            function () use ($app) {
-                                return new Form\CreditCardForm(
-                                    $app['form.factory'],
-                                    $app['payments.form.components']['type']['credit_card']
-                                );
-                            }
-                        ),
-                        'address'  => $app->share(
-                            function () use ($app) {
-                                return new Form\AddressForm(
-                                    $app['form.factory'],
-                                    $app['payments.form.components']['type']['address']
-                                );
-                            }
-                        ),
-                    ]
-                );
-            }
-        );
-
         $app['payments.controller.frontend'] = $app->share(
             function ($app) {
                 return new Frontend($app['payments.config']);
