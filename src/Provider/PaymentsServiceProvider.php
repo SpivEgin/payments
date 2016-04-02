@@ -4,8 +4,7 @@ namespace Bolt\Extension\Bolt\Payments\Provider;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
-use Bolt\Extension\Bolt\Payments\Form;
-use Bolt\Extension\Bolt\Payments\Transaction\TransactionProcessor;
+use Bolt\Extension\Bolt\Payments\Transaction\RequestProcessor;
 use Bolt\Extension\Bolt\Payments\Storage;
 use Pimple as Container;
 use Silex\Application;
@@ -50,7 +49,7 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                     $this->config['mountpoint']
                 );
 
-                return new TransactionProcessor(
+                return new RequestProcessor(
                     $app['payments.config'],
                     $app['payments.records'],
                     $app['twig'],

@@ -22,7 +22,7 @@ use Twig_Environment as TwigEnvironment;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class TransactionProcessor
+class RequestProcessor
 {
     const TYPE_AUTHORIZE = 'authorize';
     const TYPE_CAPTURE = 'capture';
