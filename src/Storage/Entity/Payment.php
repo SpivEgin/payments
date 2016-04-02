@@ -9,6 +9,8 @@ namespace Bolt\Extension\Bolt\Payments\Storage\Entity;
  */
 class Payment
 {
+    /** @var \DateTime */
+    protected $date;
     /** @var string */
     protected $customerId;
     /** @var string */
@@ -25,6 +27,22 @@ class Payment
     protected $status;
     /** @var string */
     protected $description;
+
+    /**
+     * @return \DateTime
+     */
+    public function getDate()
+    {
+        return $this->date;
+    }
+
+    /**
+     * @param \DateTime $date
+     */
+    public function setDate(\DateTime $date)
+    {
+        $this->date = $date;
+    }
 
     /**
      * @return string

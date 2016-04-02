@@ -16,15 +16,16 @@ class Payment extends BaseTable
      */
     protected function addColumns()
     {
-        $this->table->addColumn('id',                   'integer', ['autoincrement' => true]);
-        $this->table->addColumn('customerId',           'guid',    []);
-        $this->table->addColumn('gateway',              'string',  ['length' => 64]);
-        $this->table->addColumn('transactionId',        'string',  ['length' => 128]);
-        $this->table->addColumn('transactionReference', 'string',  ['length' => 128]);
-        $this->table->addColumn('amount',               'decimal', ['scale'  => 2,    'precision' => 7]);
-        $this->table->addColumn('currency',             'string',  ['length' => 3]);
-        $this->table->addColumn('status',               'string',  ['length' => 32]);
-        $this->table->addColumn('description',          'string',  ['length' => 1024, 'notnull' => false]);
+        $this->table->addColumn('id',                   'integer',  ['autoincrement' => true]);
+        $this->table->addColumn('date',                 'datetime', []);
+        $this->table->addColumn('customerId',           'guid',     []);
+        $this->table->addColumn('gateway',              'string',   ['length' => 64]);
+        $this->table->addColumn('transactionId',        'string',   ['length' => 128]);
+        $this->table->addColumn('transactionReference', 'string',   ['length' => 128]);
+        $this->table->addColumn('amount',               'decimal',  ['scale'  => 2,    'precision' => 7]);
+        $this->table->addColumn('currency',             'string',   ['length' => 3]);
+        $this->table->addColumn('status',               'string',   ['length' => 32]);
+        $this->table->addColumn('description',          'string',   ['length' => 1024, 'notnull' => false]);
     }
 
     /**
@@ -34,6 +35,7 @@ class Payment extends BaseTable
     {
         $this->table->addUniqueIndex(['customerId', 'gateway', 'transactionId']);
 
+        $this->table->addIndex(['date']);
         $this->table->addIndex(['customerId']);
         $this->table->addIndex(['gateway']);
         $this->table->addIndex(['transactionId']);
