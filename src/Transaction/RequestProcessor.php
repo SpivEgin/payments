@@ -360,22 +360,23 @@ class RequestProcessor
             ->setClientIp($request->getClientIp())
         ;
 
-        // save POST data into session
-        $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
-        $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
-
         $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
             $response = $gateway->purchase((array) $params)->send();
+            $transaction->setTransactionReference($response->getTransactionReference());
         } catch (\Exception $e) {
-
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
+
+        // save POST data into session
+        $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
+        $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         if ($response->isSuccessful()) {
 
         } elseif ($response->isRedirect()) {
+            $this->session->save();
             /** @var RedirectResponseInterface $response */
             $response->redirect();
         } else {
@@ -408,7 +409,6 @@ class RequestProcessor
             throw new RuntimeException(sprintf('Gateway %s does not support "completePurchase".', $name));
         }
 
-        // load request data from session
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
         $transaction->setClientIp($request->getClientIp());
