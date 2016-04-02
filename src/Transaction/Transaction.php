@@ -1,6 +1,6 @@
 <?php
 
-namespace Bolt\Extension\Bolt\Payments;
+namespace Bolt\Extension\Bolt\Payments\Transaction;
 
 use Omnipay\Common\CreditCard;
 

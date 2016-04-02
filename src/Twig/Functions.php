@@ -4,7 +4,7 @@ namespace Bolt\Extension\Bolt\Payments\Twig;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\GatewayManager;
-use Bolt\Extension\Bolt\Payments\Transaction;
+use Bolt\Extension\Bolt\Payments\Transaction\Transaction;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Twig_Extension as TwigExtension;
 use Twig_Markup as TwigMarkup;

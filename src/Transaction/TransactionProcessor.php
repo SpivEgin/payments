@@ -1,10 +1,12 @@
 <?php
 
-namespace Bolt\Extension\Bolt\Payments;
+namespace Bolt\Extension\Bolt\Payments\Transaction;
 
+use Bolt\Extension\Bolt\Payments\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Exception\GenericException;
 use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
+use Bolt\Extension\Bolt\Payments\GatewayManager;
 use Bolt\Extension\Bolt\Payments\Storage\Records;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
