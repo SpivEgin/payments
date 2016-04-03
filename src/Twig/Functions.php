@@ -5,6 +5,7 @@ namespace Bolt\Extension\Bolt\Payments\Twig;
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\GatewayManager;
 use Bolt\Extension\Bolt\Payments\Transaction\Transaction;
+use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Twig_Extension as TwigExtension;
 use Twig_Markup as TwigMarkup;
@@ -21,17 +22,21 @@ class Functions extends TwigExtension
     protected $config;
     /** @var SessionInterface */
     protected $session;
+    /** @var RequestStack */
+    private $requestStack;
 
     /**
      * Constructor.
      *
-     * @param Config           $session
-     * @param SessionInterface $session
+     * @param Config                  $config
+     * @param Config|SessionInterface $session
+     * @param RequestStack            $requestStack
      */
-    public function __construct(Config $config, SessionInterface $session)
+    public function __construct(Config $config, SessionInterface $session, RequestStack $requestStack)
     {
         $this->config = $config;
         $this->session = $session;
+        $this->requestStack = $requestStack;
     }
 
     /**
@@ -68,7 +73,9 @@ class Functions extends TwigExtension
      */
     public function createTransaction($gatewayName, $transactionType, array $params = [])
     {
+        $baseUrl = $this->requestStack->getCurrentRequest()->getUri();
         $transaction = new Transaction($params);
+        $transaction->setFinalUrl($baseUrl);
 
         $gatewayManager = new GatewayManager($this->config, $this->session);
         $gatewayManager->initializeSessionGateway($gatewayName);

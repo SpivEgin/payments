@@ -373,7 +373,7 @@ class RequestProcessor
         // save POST data into session
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
-        
+
         if ($response->isSuccessful()) {
             $this->records->createPaymentAuditEntry($transaction, $response, 'set purchase: success');
         } elseif ($response->isRedirect()) {
