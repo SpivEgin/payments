@@ -16,6 +16,8 @@ class PaymentAuditEntry extends Entity
     /** @var string */
     protected $transactionId;
     /** @var string */
+    protected $transactionReference;
+    /** @var string */
     protected $description;
     /** @var array */
     protected $data;
@@ -50,6 +52,22 @@ class PaymentAuditEntry extends Entity
     public function setTransactionId($transactionId)
     {
         $this->transactionId = $transactionId;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTransactionReference()
+    {
+        return $this->transactionReference;
+    }
+
+    /**
+     * @param string $transactionReference
+     */
+    public function setTransactionReference($transactionReference)
+    {
+        $this->transactionReference = $transactionReference;
     }
 
     /**
