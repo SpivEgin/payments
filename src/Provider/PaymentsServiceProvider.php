@@ -67,10 +67,12 @@ class PaymentsServiceProvider implements ServiceProviderInterface
 
         $app['payments.records'] = $app->share(
             function ($app) {
-                /** @var Storage\Repository\Payment $repo */
-                $repo = $app['storage']->getRepository(Storage\Entity\Payment::class);
+                /** @var Storage\Repository\Payment $payment */
+                $payment = $app['storage']->getRepository(Storage\Entity\Payment::class);
+                /** @var Storage\Repository\PaymentAuditEntry $paymentAuditEntry */
+                $paymentAuditEntry = $app['storage']->getRepository(Storage\Entity\PaymentAuditEntry::class);
 
-                return new Storage\Records($repo);
+                return new Storage\Records($payment, $paymentAuditEntry);
             }
         );
     }
