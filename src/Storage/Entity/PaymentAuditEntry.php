@@ -15,6 +15,8 @@ class PaymentAuditEntry
     protected $transactionId;
     /** @var string */
     protected $description;
+    /** @var array */
+    protected $data;
 
     /**
      * @return \DateTime
@@ -62,5 +64,21 @@ class PaymentAuditEntry
     public function setDescription($description)
     {
         $this->description = $description;
+    }
+
+    /**
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
+
+    /**
+     * @param array $data
+     */
+    public function setData(array $data)
+    {
+        $this->data = $data;
     }
 }
