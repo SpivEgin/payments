@@ -7,6 +7,7 @@ use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Exception\GenericException;
 use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
 use Bolt\Extension\Bolt\Payments\GatewayManager;
+use Bolt\Extension\Bolt\Payments\Storage;
 use Bolt\Extension\Bolt\Payments\Storage\Records;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
@@ -372,10 +373,11 @@ class RequestProcessor
         // save POST data into session
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
-
+        
         if ($response->isSuccessful()) {
-
+            $this->records->createPaymentAuditEntry($transaction, $response, 'set purchase: success');
         } elseif ($response->isRedirect()) {
+            $this->records->createPaymentAuditEntry($transaction, $response, 'set purchase: redirect');
             $this->session->save();
             /** @var RedirectResponseInterface $response */
             $response->redirect();
@@ -422,8 +424,10 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
-
+            $this->records->createPaymentAuditEntry($transaction, $response, 'complete purchase: success');
         } elseif ($response->isRedirect()) {
+            $this->records->createPaymentAuditEntry($transaction, $response, 'complete purchase: redirect');
+            $this->session->save();
             /** @var RedirectResponseInterface $response */
             $response->redirect();
         } else {

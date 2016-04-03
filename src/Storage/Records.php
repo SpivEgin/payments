@@ -2,6 +2,10 @@
 
 namespace Bolt\Extension\Bolt\Payments\Storage;
 
+use Bolt\Extension\Bolt\Payments\Transaction\Transaction;
+use Carbon\Carbon;
+use Omnipay\Common\Message\ResponseInterface;
+
 /**
  * Records management class.
  *
@@ -84,5 +88,25 @@ class Records
     public function deletePaymentAuditEntry(Entity\PaymentAuditEntry $paymentAuditEntry)
     {
         return $this->paymentAuditEntry->delete($paymentAuditEntry);
+    }
+
+
+    /**
+     * @param Transaction       $transaction
+     * @param ResponseInterface $response
+     * @param string            $description
+     *
+     * @return bool
+     */
+    public function createPaymentAuditEntry(Transaction $transaction, ResponseInterface $response, $description)
+    {
+        $paymentAuditEntry = new Entity\PaymentAuditEntry();
+        $paymentAuditEntry->setTransactionId($transaction->getTransactionId());
+        $paymentAuditEntry->setTransactionReference($transaction->getTransactionReference());
+        $paymentAuditEntry->setDate(Carbon::now());
+        $paymentAuditEntry->setData($response->getData());
+        $paymentAuditEntry->setDescription($description);
+        
+        return $this->paymentAuditEntry->save($paymentAuditEntry);
     }
 }
