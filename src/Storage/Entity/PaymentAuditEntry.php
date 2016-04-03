@@ -2,12 +2,14 @@
 
 namespace Bolt\Extension\Bolt\Payments\Storage\Entity;
 
+use Bolt\Storage\Entity\Entity;
+
 /**
  * Payment auditing entry entity class.
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class PaymentAuditEntry
+class PaymentAuditEntry extends Entity
 {
     /** @var \DateTime */
     protected $date;

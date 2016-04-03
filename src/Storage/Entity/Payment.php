@@ -2,12 +2,14 @@
 
 namespace Bolt\Extension\Bolt\Payments\Storage\Entity;
 
+use Bolt\Storage\Entity\Entity;
+
 /**
  * Payment entity class.
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class Payment
+class Payment extends Entity
 {
     /** @var \DateTime */
     protected $date;
