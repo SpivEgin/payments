@@ -29,6 +29,8 @@ class Transaction implements \ArrayAccess
     protected $cancelUrl;
     /** @var string */
     protected $notifyUrl;
+    /** @var string */
+    protected $finalUrl;
     /** @var CreditCard */
     protected $card;
     /** @var string */
@@ -306,6 +308,26 @@ class Transaction implements \ArrayAccess
     public function setNotifyUrl($notifyUrl)
     {
         $this->notifyUrl = $notifyUrl;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getFinalUrl()
+    {
+        return $this->finalUrl;
+    }
+
+    /**
+     * @param string $finalUrl
+     *
+     * @return Transaction
+     */
+    public function setFinalUrl($finalUrl)
+    {
+        $this->finalUrl = $finalUrl;
 
         return $this;
     }
