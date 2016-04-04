@@ -5,6 +5,7 @@ namespace Bolt\Extension\Bolt\Payments\Storage;
 use Bolt\Extension\Bolt\Members\AccessControl\Authorisation;
 use Bolt\Extension\Bolt\Payments\Transaction\Transaction;
 use Carbon\Carbon;
+use Omnipay\Common\AbstractGateway;
 use Omnipay\Common\Message\ResponseInterface;
 
 /**
@@ -41,6 +42,20 @@ class Records
     public function getPayments($customer)
     {
         return $this->payment->getCustomerPayments($customer);
+    }
+
+    /**
+     * Fetches a customer payment.
+     *
+     * @param string $customer
+     * @param string $gateway
+     * @param string $transactionId
+     *
+     * @return Entity\Payment
+     */
+    public function getCustomerPayment($customer, $gateway, $transactionId)
+    {
+        return $this->payment->getCustomerPayment($customer, $gateway, $transactionId);
     }
 
     /**
@@ -92,18 +107,19 @@ class Records
     }
 
     /**
-     * @param string      $gateway
-     * @param Transaction $transaction
+     * @param Authorisation   $authorisation
+     * @param AbstractGateway $gateway
+     * @param Transaction     $transaction
      *
      * @return bool
      */
-    public function createPayment(Authorisation $authorisation, $gateway, Transaction $transaction)
+    public function createPayment(Authorisation $authorisation, AbstractGateway $gateway, Transaction $transaction)
     {
         $payment = new Entity\Payment();
 
         $payment->setDate(Carbon::now());
         $payment->setCustomerId($authorisation->getGuid());
-        $payment->setGateway($gateway);
+        $payment->setGateway($gateway->getShortName());
         $payment->setTransactionId($transaction->getTransactionId());
         $payment->setTransactionReference($transaction->getTransactionReference());
         $payment->setAmount($transaction->getAmount());

@@ -237,7 +237,8 @@ class Frontend implements ControllerProviderInterface
      */
     public function completePurchase(Application $app, Request $request, $name)
     {
-        $html = $app['payments.processor']->completePurchase($request, $name);
+        $authorisation = $app['members.session']->getAuthorisation();
+        $html = $app['payments.processor']->completePurchase($request, $name, $authorisation);
 
         return new Response($html);
     }

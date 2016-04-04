@@ -385,12 +385,13 @@ class RequestProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         if ($response->isSuccessful()) {
-            $this->records->createPayment($authorisation, $gateway->getShortName(), $transaction);
+            $this->records->createPayment($authorisation, $gateway, $transaction);
             $this->records->createPaymentAuditEntry($transaction, $response, 'set purchase: success');
         } elseif ($response->isRedirect()) {
-            $this->records->createPayment($authorisation, $gateway->getShortName(), $transaction);
+            $this->records->createPayment($authorisation, $gateway, $transaction);
             $this->records->createPaymentAuditEntry($transaction, $response, 'set purchase: redirect');
             $this->session->save();
+
             /** @var RedirectResponseInterface $response */
             $response->redirect();
         } else {
@@ -409,14 +410,15 @@ class RequestProcessor
      *
      * NOTE: This won't work for gateways which require an internet-accessible URL (yet)
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request       $request
+     * @param string        $name
+     * @param Authorisation $authorisation
      *
      * @throws GenericException
      *
      * @return string
      */
-    public function completePurchase(Request $request, $name)
+    public function completePurchase(Request $request, $name, Authorisation $authorisation)
     {
         $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsCompletePurchase()) {
@@ -435,7 +437,11 @@ class RequestProcessor
             throw new GenericException('Sorry, there was an error. Please try again later.', $e->getCode(), $e);
         }
 
+        $payment = $this->records->getCustomerPayment($authorisation->getGuid(), $gateway->getShortName(), $transaction->getTransactionId());
+//dump($payment);
         if ($response->isSuccessful()) {
+            $payment->setStatus('paid');
+            $this->records->savePayment($payment);
             $this->records->createPaymentAuditEntry($transaction, $response, 'complete purchase: success');
         } elseif ($response->isRedirect()) {
             $this->records->createPaymentAuditEntry($transaction, $response, 'complete purchase: redirect');
