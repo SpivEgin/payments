@@ -2,6 +2,7 @@
 
 namespace Bolt\Extension\Bolt\Payments\Storage;
 
+use Bolt\Extension\Bolt\Members\AccessControl\Authorisation;
 use Bolt\Extension\Bolt\Payments\Transaction\Transaction;
 use Carbon\Carbon;
 use Omnipay\Common\Message\ResponseInterface;
@@ -90,6 +91,28 @@ class Records
         return $this->paymentAuditEntry->delete($paymentAuditEntry);
     }
 
+    /**
+     * @param string      $gateway
+     * @param Transaction $transaction
+     *
+     * @return bool
+     */
+    public function createPayment(Authorisation $authorisation, $gateway, Transaction $transaction)
+    {
+        $payment = new Entity\Payment();
+
+        $payment->setDate(Carbon::now());
+        $payment->setCustomerId($authorisation->getGuid());
+        $payment->setGateway($gateway);
+        $payment->setTransactionId($transaction->getTransactionId());
+        $payment->setTransactionReference($transaction->getTransactionReference());
+        $payment->setAmount($transaction->getAmount());
+        $payment->setCurrency($transaction->getCurrency());
+        $payment->setStatus('new');
+        $payment->setDescription(null);
+
+        return $this->payment->save($payment);
+    }
 
     /**
      * @param Transaction       $transaction
@@ -106,7 +129,7 @@ class Records
         $paymentAuditEntry->setDate(Carbon::now());
         $paymentAuditEntry->setData($response->getData());
         $paymentAuditEntry->setDescription($description);
-        
+
         return $this->paymentAuditEntry->save($paymentAuditEntry);
     }
 }
