@@ -22,54 +22,54 @@ class Payment extends Repository
     }
 
     /**
-     * Fetches all of a customer's payments.
+     * Fetches all of a customerId's payments.
      *
-     * @param string $customer
+     * @param string $customerId
      *
      * @return Entity\Payment[]
      */
-    public function getCustomerPayments($customer)
+    public function getCustomerPayments($customerId)
     {
-        $query = $this->getCustomerPaymentsQuery($customer);
+        $query = $this->getCustomerPaymentsQuery($customerId);
 
         return $this->findWith($query);
     }
 
-    public function getCustomerPaymentsQuery($customer)
+    public function getCustomerPaymentsQuery($customerId)
     {
         $qb = $this->createQueryBuilder();
         $qb->select('*')
-            ->where('customer = :customer')
-            ->setParameter('customer', $customer)
+            ->where('customerid = :customerId')
+            ->setParameter('customerId', $customerId)
         ;
 
         return $qb;
     }
 
     /**
-     * Fetches a customer payment.
+     * Fetches a customerId payment.
      *
-     * @param string $customer
+     * @param string $customerId
      * @param string $gateway
      * @param string $transactionId
      *
      * @return Entity\Payment
      */
-    public function getCustomerPayment($customer, $gateway, $transactionId)
+    public function getCustomerPayment($customerId, $gateway, $transactionId)
     {
-        $query = $this->getCustomerPaymentQuery($customer, $gateway, $transactionId);
+        $query = $this->getCustomerPaymentQuery($customerId, $gateway, $transactionId);
 
         return $this->findOneWith($query);
     }
 
-    public function getCustomerPaymentQuery($customer, $gateway, $transactionId)
+    public function getCustomerPaymentQuery($customerId, $gateway, $transactionId)
     {
         $qb = $this->createQueryBuilder();
         $qb->select('*')
-            ->where('customer = :customer')
+            ->where('customerid = :customerId')
             ->andWhere('gateway = :gateway')
             ->andWhere('transactionId = :transactionId')
-            ->setParameter('customer', $customer)
+            ->setParameter('customerId', $customerId)
             ->setParameter('gateway', $gateway)
             ->setParameter('transactionId', $transactionId)
         ;

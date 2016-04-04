@@ -18,10 +18,10 @@ class Payment extends BaseTable
     {
         $this->table->addColumn('id',                   'integer',  ['autoincrement' => true]);
         $this->table->addColumn('date',                 'datetime', []);
-        $this->table->addColumn('customerId',           'guid',     []);
+        $this->table->addColumn('customerid',           'guid',     []);
         $this->table->addColumn('gateway',              'string',   ['length' => 64]);
-        $this->table->addColumn('transactionId',        'string',   ['length' => 128]);
-        $this->table->addColumn('transactionReference', 'string',   ['length' => 128]);
+        $this->table->addColumn('transactionid',        'string',   ['length' => 128]);
+        $this->table->addColumn('transactionreference', 'string',   ['length' => 128]);
         $this->table->addColumn('amount',               'decimal',  ['scale'  => 2,    'precision' => 7]);
         $this->table->addColumn('currency',             'string',   ['length' => 3]);
         $this->table->addColumn('status',               'string',   ['length' => 32]);
