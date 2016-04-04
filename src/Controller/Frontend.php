@@ -213,7 +213,8 @@ class Frontend implements ControllerProviderInterface
     public function purchase(Application $app, Request $request, $name)
     {
         if ($request->isMethod('POST')) {
-            $html = $app['payments.processor']->setPurchase($request, $name);
+            $authorisation = $app['members.session']->getAuthorisation();
+            $html = $app['payments.processor']->setPurchase($request, $name, $authorisation);
 
             return new Response($html);
         }

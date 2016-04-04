@@ -2,6 +2,7 @@
 
 namespace Bolt\Extension\Bolt\Payments\Transaction;
 
+use Bolt\Extension\Bolt\Members\AccessControl\Authorisation;
 use Bolt\Extension\Bolt\Payments\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Exception\GenericException;
@@ -58,8 +59,14 @@ class RequestProcessor
      * @param Session         $session
      * @param string          $baseUrl
      */
-    public function __construct(Config $config, Records $records, Manager $transManager, TwigEnvironment $twig, Session $session, $baseUrl)
-    {
+    public function __construct(
+        Config $config,
+        Records $records,
+        Manager $transManager,
+        TwigEnvironment $twig,
+        Session $session,
+        $baseUrl
+    ) {
         $this->config = $config;
         $this->records = $records;
         $this->transManager = $transManager;
@@ -120,7 +127,7 @@ class RequestProcessor
 
         $cardData = $this->gatewayManager->getSessionValue($name, static::TYPE_CARD);
         $card = new CreditCard($cardData);
-        
+
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE, $this->transManager->createTransaction());
         $transaction
@@ -336,14 +343,15 @@ class RequestProcessor
     /**
      * Request POST handler to authorize and immediately capture an amount on the customer's card.
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request       $request
+     * @param string        $name
+     * @param Authorisation $authorisation
      *
      * @throws GenericException
      *
      * @return string
      */
-    public function setPurchase(Request $request, $name)
+    public function setPurchase(Request $request, $name, Authorisation $authorisation)
     {
         $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if (!$gateway->supportsPurchase()) {
@@ -352,8 +360,6 @@ class RequestProcessor
 
         // load POST data
         $card = new CreditCard($request->request->get('card'));
-
-        $params = $request->request->get('params');
 
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE);
@@ -379,8 +385,10 @@ class RequestProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
         if ($response->isSuccessful()) {
+            $this->records->createPayment($authorisation, $gateway->getShortName(), $transaction);
             $this->records->createPaymentAuditEntry($transaction, $response, 'set purchase: success');
         } elseif ($response->isRedirect()) {
+            $this->records->createPayment($authorisation, $gateway->getShortName(), $transaction);
             $this->records->createPaymentAuditEntry($transaction, $response, 'set purchase: redirect');
             $this->session->save();
             /** @var RedirectResponseInterface $response */
