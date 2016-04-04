@@ -438,7 +438,7 @@ class RequestProcessor
         }
 
         $payment = $this->records->getCustomerPayment($authorisation->getGuid(), $gateway->getShortName(), $transaction->getTransactionId());
-//dump($payment);
+
         if ($response->isSuccessful()) {
             $payment->setStatus('paid');
             $this->records->savePayment($payment);

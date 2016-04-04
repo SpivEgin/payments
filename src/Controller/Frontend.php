@@ -130,6 +130,8 @@ class Frontend implements ControllerProviderInterface
      */
     public function settings(Application $app, Request $request, $name)
     {
+        return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
+
         if ($request->isMethod('POST')) {
             $app['payments.processor']->setSettings($request, $name);
             $target = $request->getBaseUrl() . $request->getPathInfo();
@@ -153,6 +155,8 @@ class Frontend implements ControllerProviderInterface
      */
     public function authorize(Application $app, Request $request, $name)
     {
+        return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
+
         if ($request->isMethod('POST')) {
             $html = $app['payments.processor']->setAuthorize($request, $name);
 
@@ -174,6 +178,8 @@ class Frontend implements ControllerProviderInterface
      */
     public function completeAuthorize(Application $app, $name)
     {
+        return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
+
         $html = $app['payments.processor']->completeAuthorize($name);
 
         return new Response($html);
@@ -190,6 +196,8 @@ class Frontend implements ControllerProviderInterface
      */
     public function capture(Application $app, Request $request, $name)
     {
+        return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
+
         if ($request->isMethod('POST')) {
             $html = $app['payments.processor']->setCapture($request, $name);
 
@@ -254,6 +262,8 @@ class Frontend implements ControllerProviderInterface
      */
     public function createCard(Application $app, Request $request, $name)
     {
+        return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
+
         if ($request->isMethod('POST')) {
             $html = $app['payments.processor']->setCreateCard($request, $name);
 
@@ -276,6 +286,8 @@ class Frontend implements ControllerProviderInterface
      */
     public function updateCard(Application $app, Request $request, $name)
     {
+        return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
+
         if ($request->isMethod('POST')) {
             $html = $app['payments.processor']->setUpdateCard($request, $name);
 
@@ -298,6 +310,8 @@ class Frontend implements ControllerProviderInterface
      */
     public function deleteCard(Application $app, Request $request, $name)
     {
+        return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
+
         if ($request->isMethod('POST')) {
             $html = $app['payments.processor']->setDeleteCard($request, $name);
 
