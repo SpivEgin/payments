@@ -3,6 +3,7 @@
 namespace Bolt\Extension\Bolt\Payments\Controller;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
+use Bolt\Extension\Bolt\Members\AccessControl\Session as MembersSession;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
@@ -102,9 +103,20 @@ class Frontend implements ControllerProviderInterface
      * @param Request     $request
      * @param Response    $response
      * @param Application $app
+     *
+     * @return null|RedirectResponse
      */
     public function before(Request $request, Response $response, Application $app)
     {
+        if (!isset($app['members.session']) || !$app['members.session'] instanceof MembersSession) {
+            return new Response('Payments controller requires bolt/members to be installed and configured.', Response::HTTP_FAILED_DEPENDENCY);
+        }
+
+        if ($app['members.session']->hasAuthorisation()) {
+            return null;
+        }
+
+        return new RedirectResponse($app['url_generator.lazy']->generate('authenticationLogin'));
     }
 
     /**
