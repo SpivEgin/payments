@@ -4,9 +4,10 @@ namespace Bolt\Extension\Bolt\Payments\Provider;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
-use Bolt\Extension\Bolt\Payments\Transaction\RequestProcessor;
+use Bolt\Extension\Bolt\Payments\Transaction;
 use Bolt\Extension\Bolt\Payments\Storage;
 use Pimple as Container;
+use Ramsey\Uuid\Uuid;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
 
@@ -49,9 +50,10 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                     $this->config['mountpoint']
                 );
 
-                return new RequestProcessor(
+                return new Transaction\RequestProcessor(
                     $app['payments.config'],
                     $app['payments.records'],
+                    $app['payments.transaction.manager'],
                     $app['twig'],
                     $app['session'],
                     $baseUrl
@@ -73,6 +75,20 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                 $paymentAuditEntry = $app['storage']->getRepository(Storage\Entity\PaymentAuditEntry::class);
 
                 return new Storage\Records($payment, $paymentAuditEntry);
+            }
+        );
+
+        if (!isset($app['payments.transaction.id_generator'])) {
+            $app['payments.transaction.id_generator'] = $app->protect(
+                function () {
+                    return Uuid::uuid4()->toString();
+                }
+            );
+        }
+        
+        $app['payments.transaction.manager'] = $app->share(
+            function ($app) {
+                return new Transaction\Manager($app['payments.config'], $app['payments.transaction.id_generator']);
             }
         );
     }

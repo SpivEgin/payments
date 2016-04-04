@@ -45,20 +45,24 @@ class RequestProcessor
     protected $baseUrl;
     /** @var GatewayManager */
     protected $gatewayManager;
+    /** @var Manager */
+    private $transManager;
 
     /**
      * Constructor.
      *
      * @param Config          $config
      * @param Records         $records
+     * @param Manager         $transManager
      * @param TwigEnvironment $twig
      * @param Session         $session
      * @param string          $baseUrl
      */
-    public function __construct(Config $config, Records $records, TwigEnvironment $twig, Session $session, $baseUrl)
+    public function __construct(Config $config, Records $records, Manager $transManager, TwigEnvironment $twig, Session $session, $baseUrl)
     {
         $this->config = $config;
         $this->records = $records;
+        $this->transManager = $transManager;
         $this->twig = $twig;
         $this->session = $session;
         $this->baseUrl = $baseUrl;
@@ -116,9 +120,9 @@ class RequestProcessor
 
         $cardData = $this->gatewayManager->getSessionValue($name, static::TYPE_CARD);
         $card = new CreditCard($cardData);
-
+        
         /** @var Transaction $transaction */
-        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE, new Transaction());
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE, $this->transManager->createTransaction());
         $transaction
             ->setReturnUrl($this->getInternalUrl($name, 'completeAuthorize'))
             ->setCancelUrl($request->getUri())
@@ -243,7 +247,7 @@ class RequestProcessor
 
         $context = [
             'method'  => 'capture',
-            'params'  => $this->gatewayManager->getSessionValue($name, static::TYPE_CAPTURE, new Transaction()),
+            'params'  => $this->gatewayManager->getSessionValue($name, static::TYPE_CAPTURE, $this->transManager->createTransaction()),
         ];
 
         return $this->render($gateway, 'request.twig', $context);
@@ -312,7 +316,7 @@ class RequestProcessor
 
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
         /** @var Transaction $transaction */
-        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, $this->transManager->createTransaction());
         $transaction
             ->setReturnUrl($this->getInternalUrl($name, 'completePurchase'))
             ->setCancelUrl($request->getUri())
@@ -412,7 +416,7 @@ class RequestProcessor
         }
 
         /** @var Transaction $transaction */
-        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, new Transaction());
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, $this->transManager->createTransaction());
         $transaction->setClientIp($request->getClientIp());
 
         $params = $this->getGatewayParameters($name, $transaction);
@@ -454,7 +458,7 @@ class RequestProcessor
 
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
         /** @var Transaction $transaction */
-        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_CREATE, new Transaction());
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_CREATE, $this->transManager->createTransaction());
         $transaction->setCard($card);
 
         $context = [
@@ -534,7 +538,7 @@ class RequestProcessor
 
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
         /** @var Transaction $transaction */
-        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_UPDATE, new Transaction());
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_UPDATE, $this->transManager->createTransaction());
         $transaction->setCard($card);
 
         $context = [
@@ -613,7 +617,7 @@ class RequestProcessor
         $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
         /** @var Transaction $transaction */
-        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_DELETE, new Transaction());
+        $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_DELETE, $this->transManager->createTransaction());
 
         $context = [
             'method'  => 'deleteCard',
@@ -708,7 +712,7 @@ class RequestProcessor
     /**
      * Return a combined array of parameters to be passed to the gateway.
      *
-     * @param string      $name
+     * @param string                  $name
      * @param Transaction $transaction
      *
      * @return array
