@@ -27,6 +27,7 @@ class Config
     {
         $this->mountpoint = $config['mountpoint'];
         $this->forms = $config['forms'];
+        $this->templates = $config['templates'];
         $this->providers = new Provider($config);
     }
 
@@ -51,11 +52,14 @@ class Config
     /**
      * Return a configured template name.
      *
+     * @param string $category
+     * @param string $type
+     *
      * @return string
      */
-    public function getTemplate($template)
+    public function getTemplate($category, $type)
     {
-        return $this->templates[$template];
+        return $this->templates[$category][$type];
     }
 
     /**

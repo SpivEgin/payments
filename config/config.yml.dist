@@ -10,6 +10,9 @@
 #
 #templates:
 #    parent: layout.twig
-#    gateway: gateway.twig
-#    request: request.twig
-#    response: response.twig
+#    pages:
+#        payment: payment.twig
+#        address: address.twig
+#        complete: complete.twig
+#    button:
+#        payment: _button_payment.twig

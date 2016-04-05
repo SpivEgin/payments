@@ -244,9 +244,14 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
             ],
             'templates'  => [
                 'parent'   => 'layout.twig',
-                'gateway'  => 'gateway.twig',
-                'request'  => 'request.twig',
-                'response' => 'layout.twig',
+                'pages' => [
+                    'payment'  => 'payment.twig',
+                    'address'  => 'address.twig',
+                    'complete' => 'complete.twig',
+                ],
+                'button' => [
+                    'payment' => '_button_payment.twig',
+                ],
             ],
         ];
     }
