@@ -8,6 +8,7 @@ use Bolt\Extension\Bolt\Payments\Transaction;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
 use Twig_Extension as TwigExtension;
+use Twig_Environment as TwigEnvironment;
 use Twig_Markup as TwigMarkup;
 use Twig_SimpleFunction as TwigSimpleFunction;
 
@@ -60,8 +61,29 @@ class Functions extends TwigExtension
         $env  = ['needs_environment' => true];
 
         return [
+            new TwigSimpleFunction('payment_button', [$this, 'getPaymentButton'], $safe + $env),
             new TwigSimpleFunction('payment_transaction', [$this, 'createPaymentTransaction'], $safe),
         ];
+    }
+
+    /**
+     * Generate a button to start payments.
+     *
+     * @param TwigEnvironment $twig
+     * @param string          $gatewayName
+     * @param string          $method
+     *
+     * @return TwigMarkup
+     */
+    public function getPaymentButton(TwigEnvironment $twig, $gatewayName, $method = 'GET')
+    {
+        $context = [
+            'payment_url' => $this->config->getTransactionUrl($gatewayName, 'purchase'),
+            'method' => $method,
+        ];
+        $html = $twig->render($this->config->getTemplate('button', 'payment'), $context);
+
+        return new TwigMarkup($html, 'UTF-8');
     }
 
     /**
