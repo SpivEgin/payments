@@ -39,7 +39,7 @@ class Payment extends Repository
     {
         $qb = $this->createQueryBuilder();
         $qb->select('*')
-            ->where('customerid = :customerId')
+            ->where('customer_id = :customerId')
             ->setParameter('customerId', $customerId)
         ;
 
@@ -66,9 +66,9 @@ class Payment extends Repository
     {
         $qb = $this->createQueryBuilder();
         $qb->select('*')
-            ->where('customerid = :customerId')
+            ->where('customer_id = :customerId')
             ->andWhere('gateway = :gateway')
-            ->andWhere('transactionId = :transactionId')
+            ->andWhere('transaction_id = :transactionId')
             ->setParameter('customerId', $customerId)
             ->setParameter('gateway', $gateway)
             ->setParameter('transactionId', $transactionId)

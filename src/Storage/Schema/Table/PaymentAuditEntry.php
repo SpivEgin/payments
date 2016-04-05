@@ -16,11 +16,11 @@ class PaymentAuditEntry extends BaseTable
      */
     protected function addColumns()
     {
-        $this->table->addColumn('id',            'integer',    ['autoincrement' => true]);
-        $this->table->addColumn('date',          'datetime',   []);
-        $this->table->addColumn('transactionid', 'string',     ['length' => 128]);
-        $this->table->addColumn('description',   'string',     ['length' => 1024, 'notnull' => false]);
-        $this->table->addColumn('data',          'json_array', ['notnull' => false]);
+        $this->table->addColumn('id',             'integer',    ['autoincrement' => true]);
+        $this->table->addColumn('date',           'datetime',   []);
+        $this->table->addColumn('transaction_id', 'string',     ['length' => 128]);
+        $this->table->addColumn('description',    'string',     ['length' => 1024, 'notnull' => false]);
+        $this->table->addColumn('data',           'json_array', ['notnull' => false]);
     }
 
     /**
@@ -29,7 +29,7 @@ class PaymentAuditEntry extends BaseTable
     protected function addIndexes()
     {
         $this->table->addIndex(['date']);
-        $this->table->addIndex(['transactionId']);
+        $this->table->addIndex(['transaction_id']);
     }
 
     /**

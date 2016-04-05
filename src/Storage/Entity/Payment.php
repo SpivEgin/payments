@@ -14,13 +14,13 @@ class Payment extends Entity
     /** @var \DateTime */
     protected $date;
     /** @var string */
-    protected $customerId;
+    protected $customer_id;
     /** @var string */
     protected $gateway;
     /** @var string */
-    protected $transactionId;
+    protected $transaction_id;
     /** @var string */
-    protected $transactionReference;
+    protected $transaction_reference;
     /** @var float */
     protected $amount;
     /** @var string */
@@ -51,7 +51,7 @@ class Payment extends Entity
      */
     public function getCustomerId()
     {
-        return $this->customerId;
+        return $this->customer_id;
     }
 
     /**
@@ -59,7 +59,7 @@ class Payment extends Entity
      */
     public function setCustomerId($customerId)
     {
-        $this->customerId = $customerId;
+        $this->customer_id = $customerId;
     }
 
     /**
@@ -83,7 +83,7 @@ class Payment extends Entity
      */
     public function getTransactionId()
     {
-        return $this->transactionId;
+        return $this->transaction_id;
     }
 
     /**
@@ -91,7 +91,7 @@ class Payment extends Entity
      */
     public function setTransactionId($transactionId)
     {
-        $this->transactionId = $transactionId;
+        $this->transaction_id = $transactionId;
     }
 
     /**
@@ -99,7 +99,7 @@ class Payment extends Entity
      */
     public function getTransactionReference()
     {
-        return $this->transactionReference;
+        return $this->transaction_reference;
     }
 
     /**
@@ -107,7 +107,7 @@ class Payment extends Entity
      */
     public function setTransactionReference($transactionReference)
     {
-        $this->transactionReference = $transactionReference;
+        $this->transaction_reference = $transactionReference;
     }
 
     /**
