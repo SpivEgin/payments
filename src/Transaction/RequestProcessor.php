@@ -57,22 +57,19 @@ class RequestProcessor
      * @param Manager         $transManager
      * @param TwigEnvironment $twig
      * @param Session         $session
-     * @param string          $baseUrl
      */
     public function __construct(
         Config $config,
         Records $records,
         Manager $transManager,
         TwigEnvironment $twig,
-        Session $session,
-        $baseUrl
+        Session $session
     ) {
         $this->config = $config;
         $this->records = $records;
         $this->transManager = $transManager;
         $this->twig = $twig;
         $this->session = $session;
-        $this->baseUrl = $baseUrl;
 
         $this->gatewayManager = new GatewayManager($config, $session);
     }
@@ -131,7 +128,7 @@ class RequestProcessor
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_AUTHORIZE, $this->transManager->createTransaction());
         $transaction
-            ->setReturnUrl($this->getInternalUrl($name, 'completeAuthorize'))
+            ->setReturnUrl($this->config->getTransactionUrl($name, 'completeAuthorize'))
             ->setCancelUrl($request->getUri())
             ->setCard($card)
         ;
@@ -365,7 +362,7 @@ class RequestProcessor
             throw new GenericException('Sorry, there was an error. Please try again later.');
         }
         $transaction
-            ->setReturnUrl($this->getInternalUrl($name, 'completePurchase'))
+            ->setReturnUrl($this->config->getTransactionUrl($name, 'completePurchase'))
             ->setCancelUrl($request->getUri())
             ->setCard($card)
             ->setClientIp($request->getClientIp())
@@ -707,19 +704,6 @@ class RequestProcessor
         ];
 
         return $this->twig->render($template, $context);
-    }
-
-    /**
-     * Construct an internal payments URL.
-     *
-     * @param string $provider
-     * @param string $routeName
-     *
-     * @return string
-     */
-    protected function getInternalUrl($provider, $routeName)
-    {
-        return sprintf('%s/gateways/%s/%s', $this->baseUrl, $provider, $routeName);
     }
 
     /**

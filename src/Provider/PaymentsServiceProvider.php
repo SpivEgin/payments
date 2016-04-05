@@ -37,26 +37,25 @@ class PaymentsServiceProvider implements ServiceProviderInterface
     public function register(Application $app)
     {
         $app['payments.config'] = $app->share(
-            function () {
-                return new Config($this->config);
-            }
-        );
-
-        $app['payments.processor'] = $app->share(
             function ($app) {
                 $baseUrl = sprintf(
                     '%s%s',
                     $app['resources']->getUrl('rooturl'),
                     $this->config['mountpoint']
                 );
+                
+                return new Config($this->config, $baseUrl);
+            }
+        );
 
+        $app['payments.processor'] = $app->share(
+            function ($app) {
                 return new Transaction\RequestProcessor(
                     $app['payments.config'],
                     $app['payments.records'],
                     $app['payments.transaction.manager'],
                     $app['twig'],
-                    $app['session'],
-                    $baseUrl
+                    $app['session']                    
                 );
             }
         );

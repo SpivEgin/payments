@@ -17,18 +17,22 @@ class Config
     protected $forms;
     /** @var Provider */
     protected $providers;
+    /** @var string */
+    private $baseUrl;
 
     /**
      * Constructor.
      *
-     * @param array $config
+     * @param array  $config
+     * @param string $baseUrl
      */
-    public function __construct(array $config)
+    public function __construct(array $config, $baseUrl)
     {
         $this->mountpoint = $config['mountpoint'];
         $this->forms = $config['forms'];
         $this->templates = $config['templates'];
         $this->providers = new Provider($config);
+        $this->baseUrl = $baseUrl;
     }
 
     /**
@@ -84,5 +88,18 @@ class Config
     public function getFormRequired($form, $field)
     {
         return $this->forms[$form][$field]['required'];
+    }
+    
+    /**
+     * Construct an internal payments URL.
+     *
+     * @param string $provider
+     * @param string $routeName
+     *
+     * @return string
+     */
+    public function getTransactionUrl($provider, $routeName)
+    {
+        return sprintf('%s/gateways/%s/%s', $this->baseUrl, $provider, $routeName);
     }
 }
