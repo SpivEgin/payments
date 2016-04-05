@@ -144,7 +144,7 @@ class GatewayManager
      */
     public static function getSessionName($gatewayName, $type)
     {
-        return static::getSessionPrefix($gatewayName) . $type;
+        return static::getSessionPrefix($gatewayName) . '.' . $type;
     }
 
 
