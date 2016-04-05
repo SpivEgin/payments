@@ -39,10 +39,12 @@ class Manager
      */
     public function createTransaction(array $params = [])
     {
-        $generator = $this->idGenerator;
-        $id = $generator();
+        if (!isset($params['transactionId'])) {
+            $generator = $this->idGenerator;
+            $id = $generator();
+            $params['transactionId'] = $id;
+        }
         $transaction = new Transaction($params);
-        $transaction->setTransactionId($id);
 
         return $transaction;
     }
