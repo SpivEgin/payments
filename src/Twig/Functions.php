@@ -60,7 +60,7 @@ class Functions extends TwigExtension
         $env  = ['needs_environment' => true];
 
         return [
-            new TwigSimpleFunction('create_transaction', [$this, 'createTransaction'], $safe),
+            new TwigSimpleFunction('payment_transaction', [$this, 'createPaymentTransaction'], $safe),
         ];
     }
 
@@ -68,14 +68,14 @@ class Functions extends TwigExtension
      * Create a transaction object and save to the session.
      *
      * <pre>
-     *  {{ create_transaction('mollie', 'purchase', {amount: 1972.09, currency: 'EUR', description: 'Gumleaves' }) }}
+     *  {{ payment_transaction('mollie', 'purchase', {amount: 1972.09, currency: 'EUR', description: 'Gumleaves' }) }}
      * </pre>
      *
      * @param string $gatewayName
      * @param string $transactionType
      * @param array  $params
      */
-    public function createTransaction($gatewayName, $transactionType, array $params = [])
+    public function createPaymentTransaction($gatewayName, $transactionType, array $params = [])
     {
         $baseUrl = $this->requestStack->getCurrentRequest()->getUri();
 
