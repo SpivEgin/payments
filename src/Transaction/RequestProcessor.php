@@ -325,8 +325,6 @@ class RequestProcessor
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, $this->transManager->createTransaction());
         $transaction
-            ->setReturnUrl($this->getInternalUrl($name, 'completePurchase'))
-            ->setCancelUrl($request->getUri())
             ->setCard($card)
         ;
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
@@ -367,6 +365,8 @@ class RequestProcessor
             throw new GenericException('Sorry, there was an error. Please try again later.');
         }
         $transaction
+            ->setReturnUrl($this->getInternalUrl($name, 'completePurchase'))
+            ->setCancelUrl($request->getUri())
             ->setCard($card)
             ->setClientIp($request->getClientIp())
         ;
@@ -702,7 +702,6 @@ class RequestProcessor
     protected function render($gateway, $template, array $context = [])
     {
         $context += [
-            'baseurl'  => $this->baseUrl,
             'gateway'  => $gateway,
             'settings' => $gateway->getParameters(),
         ];
