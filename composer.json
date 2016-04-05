@@ -92,6 +92,9 @@
     },
     "extra": {
         "bolt-assets": "web",
-        "bolt-class": "Bolt\\Extension\\Bolt\\Payments\\PaymentsExtension"
+        "bolt-class": "Bolt\\Extension\\Bolt\\Payments\\PaymentsExtension",
+        "branch-alias": {
+            "dev-master": "3.0.x-dev"
+        }
     }
 }
