@@ -133,13 +133,14 @@ class RequestProcessor
             ->setCard($card)
         ;
 
+        $template = $this->config->getTemplate('pages', 'payment');
         $context = [
             'method'  => 'authorize',
             'params'  => $transaction,
             'card'    => $transaction->getCard()->getParameters(),
         ];
 
-        return $this->render($gateway, 'request.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -190,11 +191,12 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
+        $template = $this->config->getTemplate('pages', 'complete');
         $context = [
             'response' => $response,
         ];
 
-        return $this->render($gateway, 'response.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -231,11 +233,12 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
+        $template = $this->config->getTemplate('pages', 'complete');
         $context = [
             'response' => $response,
         ];
 
-        return $this->render($gateway, 'response.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -249,12 +252,13 @@ class RequestProcessor
     {
         $gateway = $this->gatewayManager->initializeSessionGateway($name);
 
+        $template = $this->config->getTemplate('pages', 'payment');
         $context = [
             'method'  => 'capture',
             'params'  => $this->gatewayManager->getSessionValue($name, static::TYPE_CAPTURE, $this->transManager->createTransaction()),
         ];
 
-        return $this->render($gateway, 'request.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -299,11 +303,12 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
+        $template = $this->config->getTemplate('pages', 'complete');
         $context = [
             'response' => $response,
         ];
 
-        return $this->render($gateway, 'response.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -326,13 +331,14 @@ class RequestProcessor
         ;
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
 
+        $template = $this->config->getTemplate('pages', 'payment');
         $context = [
             'method'  => 'purchase',
             'params'  => $transaction,
             'card'    => $transaction->getCard()->getParameters(),
         ];
 
-        return $this->render($gateway, 'request.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -395,11 +401,12 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
+        $template = $this->config->getTemplate('pages', 'complete');
         $context = [
             'response' => $response,
         ];
 
-        return $this->render($gateway, 'response.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -449,11 +456,12 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
+        $template = $this->config->getTemplate('pages', 'complete');
         $context = [
             'response' => $response,
         ];
 
-        return $this->render($gateway, 'response.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -472,13 +480,14 @@ class RequestProcessor
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_CREATE, $this->transManager->createTransaction());
         $transaction->setCard($card);
 
+        $template = $this->config->getTemplate('pages', 'payment');
         $context = [
             'method'  => 'createCard',
             'params'  => $transaction,
             'card'    => $transaction->getCard()->getParameters(),
         ];
 
-        return $this->render($gateway, 'request.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -529,11 +538,12 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
+        $template = $this->config->getTemplate('pages', 'complete');
         $context = [
             'response' => $response,
         ];
 
-        return $this->render($gateway, 'response.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -552,13 +562,14 @@ class RequestProcessor
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_UPDATE, $this->transManager->createTransaction());
         $transaction->setCard($card);
 
+        $template = $this->config->getTemplate('pages', 'payment');
         $context = [
             'method'  => 'updateCard',
             'params'  => $transaction,
             'card'    => $transaction->getCard()->getParameters(),
         ];
 
-        return $this->render($gateway, 'request.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -609,11 +620,12 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
+        $template = $this->config->getTemplate('pages', 'complete');
         $context = [
             'response' => $response,
         ];
 
-        return $this->render($gateway, 'response.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -630,12 +642,13 @@ class RequestProcessor
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_DELETE, $this->transManager->createTransaction());
 
+        $template = $this->config->getTemplate('pages', 'payment');
         $context = [
             'method'  => 'deleteCard',
             'params'  => $transaction,
         ];
 
-        return $this->render($gateway, 'request.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
@@ -680,11 +693,12 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
+        $template = $this->config->getTemplate('pages', 'complete');
         $context = [
             'response' => $response,
         ];
 
-        return $this->render($gateway, 'response.twig', $context);
+        return $this->render($gateway, $template, $context);
     }
 
     /**
