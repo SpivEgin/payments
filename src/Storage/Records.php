@@ -131,15 +131,17 @@ class Records
     }
 
     /**
+     * @param Authorisation     $authorisation
      * @param Transaction       $transaction
      * @param ResponseInterface $response
      * @param string            $description
      *
      * @return bool
      */
-    public function createPaymentAuditEntry(Transaction $transaction, ResponseInterface $response, $description)
+    public function createPaymentAuditEntry(Authorisation $authorisation, Transaction $transaction, ResponseInterface $response, $description)
     {
         $paymentAuditEntry = new Entity\PaymentAuditEntry();
+        $paymentAuditEntry->setCustomerId($authorisation->getGuid());
         $paymentAuditEntry->setTransactionId($transaction->getTransactionId());
         $paymentAuditEntry->setTransactionReference($transaction->getTransactionReference());
         $paymentAuditEntry->setDate(Carbon::now());

@@ -14,6 +14,8 @@ class PaymentAuditEntry extends Entity
     /** @var \DateTime */
     protected $date;
     /** @var string */
+    protected $customer_id;
+    /** @var string */
     protected $transaction_id;
     /** @var string */
     protected $transaction_reference;
@@ -36,6 +38,22 @@ class PaymentAuditEntry extends Entity
     public function setDate($date)
     {
         $this->date = $date;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCustomerId()
+    {
+        return $this->customer_id;
+    }
+
+    /**
+     * @param string $customerId
+     */
+    public function setCustomerId($customerId)
+    {
+        $this->customer_id = $customerId;
     }
 
     /**

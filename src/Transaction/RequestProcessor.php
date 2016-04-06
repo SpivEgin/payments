@@ -446,9 +446,9 @@ class RequestProcessor
         if ($response->isSuccessful()) {
             $payment->setStatus('paid');
             $this->records->savePayment($payment);
-            $this->records->createPaymentAuditEntry($transaction, $response, 'complete purchase: success');
+            $this->records->createPaymentAuditEntry($authorisation, $transaction, $response, 'complete purchase: success');
         } elseif ($response->isRedirect()) {
-            $this->records->createPaymentAuditEntry($transaction, $response, 'complete purchase: redirect');
+            $this->records->createPaymentAuditEntry($authorisation, $transaction, $response, 'complete purchase: redirect');
             $this->session->save();
             /** @var RedirectResponseInterface $response */
             $response->redirect();
