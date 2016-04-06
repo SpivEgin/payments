@@ -64,12 +64,12 @@
     "autoload": {
         "psr-4": {
             "Bolt\\Extension\\Bolt\\Payments\\": "src",
-            "Omnipay\\": "lib/omnipay/common/src",
+            "Omnipay\\": "lib/omnipay/common/src/Omnipay",
             "Omnipay\\AuthorizeNet\\": "lib/omnipay/authorizenet/src",
             "Omnipay\\Buckaroo\\": "lib/omnipay/buckaroo/src",
             "Omnipay\\CardSave\\": "lib/omnipay/cardsave/src",
             "Omnipay\\Coinbase\\": "lib/omnipay/coinbase/src",
-            "Omnipay\\Common\\": "lib/omnipay/common/src",
+            "Omnipay\\Common\\": "lib/omnipay/common/src/Omnipay/Common",
             "Omnipay\\Dummy\\": "lib/omnipay/dummy/src",
             "Omnipay\\Eway\\": "lib/omnipay/eway/src",
             "Omnipay\\FirstData\\": "lib/omnipay/firstdata/src",
