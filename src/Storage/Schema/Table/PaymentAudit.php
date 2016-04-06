@@ -47,6 +47,6 @@ class PaymentAudit extends BaseTable
      */
     protected function addForeignKeyConstraints()
     {
-        $this->table->addForeignKeyConstraint($this->tablePrefix . 'payments', ['customer_id'], ['customer_id'], [], 'guid_payment_meta');
+        $this->table->addForeignKeyConstraint($this->tablePrefix . 'payment', ['customer_id'], ['customer_id'], [], 'guid_payment_meta');
     }
 }
