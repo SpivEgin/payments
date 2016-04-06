@@ -21,6 +21,12 @@ class GatewayManager
     /** @var  CombinedGatewayInterface[] */
     protected $gateways;
 
+    /**
+     * Constructor.
+     *
+     * @param Config           $config
+     * @param SessionInterface $session
+     */
     public function __construct(Config $config, SessionInterface $session)
     {
         $this->config = $config;
