@@ -9,7 +9,7 @@ use Bolt\Storage\Database\Schema\Table\BaseTable;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class PaymentAuditEntry extends BaseTable
+class PaymentAudit extends BaseTable
 {
     /**
      * {@inheritdoc}

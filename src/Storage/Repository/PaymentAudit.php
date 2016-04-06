@@ -10,7 +10,7 @@ use Bolt\Storage\Repository;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class PaymentAuditEntry extends Repository
+class PaymentAudit extends Repository
 {
     /**
      * {@inheritdoc}

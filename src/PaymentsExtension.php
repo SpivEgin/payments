@@ -129,7 +129,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
     {
         return [
             'payment'       => Storage\Schema\Table\Payment::class,
-            'payment_audit' => Storage\Schema\Table\PaymentAuditEntry::class,
+            'payment_audit' => Storage\Schema\Table\PaymentAudit::class,
         ];
     }
 
@@ -140,7 +140,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
     {
         return [
             'payment'       => [Storage\Entity\Payment::class => Storage\Repository\Payment::class],
-            'payment_audit' => [Storage\Entity\PaymentAuditEntry::class => Storage\Repository\PaymentAuditEntry::class],
+            'payment_audit' => [Storage\Entity\PaymentAudit::class => Storage\Repository\PaymentAudit::class],
         ];
     }
 

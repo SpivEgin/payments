@@ -17,19 +17,19 @@ class Records
 {
     /** @var Repository\Payment */
     protected $payment;
-    /** @var Repository\PaymentAuditEntry */
-    protected $paymentAuditEntry;
+    /** @var Repository\PaymentAudit */
+    protected $paymentAudit;
 
     /**
      * Constructor.
      *
      * @param Repository\Payment           $payment
-     * @param Repository\PaymentAuditEntry $paymentAuditEntry
+     * @param Repository\PaymentAudit $paymentAudit
      */
-    public function __construct(Repository\Payment $payment, Repository\PaymentAuditEntry $paymentAuditEntry)
+    public function __construct(Repository\Payment $payment, Repository\PaymentAudit $paymentAudit)
     {
         $this->payment = $payment;
-        $this->paymentAuditEntry = $paymentAuditEntry;
+        $this->paymentAudit = $paymentAudit;
     }
 
     /**
@@ -85,25 +85,25 @@ class Records
     /**
      * Save an payment audit entity.
      *
-     * @param Entity\PaymentAuditEntry $paymentAuditEntry
+     * @param Entity\PaymentAudit $paymentAudit
      *
      * @return bool
      */
-    public function savePaymentAuditEntry(Entity\PaymentAuditEntry $paymentAuditEntry)
+    public function savePaymentAudit(Entity\PaymentAudit $paymentAudit)
     {
-        return $this->paymentAuditEntry->save($paymentAuditEntry);
+        return $this->paymentAudit->save($paymentAudit);
     }
 
     /**
      * Delete an payment audit entity.
      *
-     * @param Entity\PaymentAuditEntry $paymentAuditEntry
+     * @param Entity\PaymentAudit $paymentAudit
      *
      * @return bool
      */
-    public function deletePaymentAuditEntry(Entity\PaymentAuditEntry $paymentAuditEntry)
+    public function deletePaymentAudit(Entity\PaymentAudit $paymentAudit)
     {
-        return $this->paymentAuditEntry->delete($paymentAuditEntry);
+        return $this->paymentAudit->delete($paymentAudit);
     }
 
     /**
@@ -138,16 +138,16 @@ class Records
      *
      * @return bool
      */
-    public function createPaymentAuditEntry(Authorisation $authorisation, Transaction $transaction, ResponseInterface $response, $description)
+    public function createPaymentAudit(Authorisation $authorisation, Transaction $transaction, ResponseInterface $response, $description)
     {
-        $paymentAuditEntry = new Entity\PaymentAuditEntry();
-        $paymentAuditEntry->setCustomerId($authorisation->getGuid());
-        $paymentAuditEntry->setTransactionId($transaction->getTransactionId());
-        $paymentAuditEntry->setTransactionReference($transaction->getTransactionReference());
-        $paymentAuditEntry->setDate(Carbon::now());
-        $paymentAuditEntry->setData($response->getData());
-        $paymentAuditEntry->setDescription($description);
+        $paymentAudit = new Entity\PaymentAudit();
+        $paymentAudit->setCustomerId($authorisation->getGuid());
+        $paymentAudit->setTransactionId($transaction->getTransactionId());
+        $paymentAudit->setTransactionReference($transaction->getTransactionReference());
+        $paymentAudit->setDate(Carbon::now());
+        $paymentAudit->setData($response->getData());
+        $paymentAudit->setDescription($description);
 
-        return $this->paymentAuditEntry->save($paymentAuditEntry);
+        return $this->paymentAudit->save($paymentAudit);
     }
 }

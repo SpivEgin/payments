@@ -9,7 +9,7 @@ use Bolt\Storage\Entity\Entity;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class PaymentAuditEntry extends Entity
+class PaymentAudit extends Entity
 {
     /** @var \DateTime */
     protected $date;
