@@ -51,6 +51,9 @@
         "bolt/members": "^3.0@dev",
         "guzzle/guzzle": "^3.9"
     },
+    "provide": {
+        "symfony/event-dispatcher": "2.8"
+    },
     "license": "MIT",
     "authors": [
         {
