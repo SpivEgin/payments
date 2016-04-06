@@ -385,10 +385,10 @@ class RequestProcessor
 
         if ($response->isSuccessful()) {
             $this->records->createPayment($authorisation, $gateway, $transaction);
-            $this->records->createPaymentAudit($transaction, $response, 'set purchase: success');
+            $this->records->createPaymentAudit($authorisation, $transaction, $response, 'set purchase: success');
         } elseif ($response->isRedirect()) {
             $this->records->createPayment($authorisation, $gateway, $transaction);
-            $this->records->createPaymentAudit($transaction, $response, 'set purchase: redirect');
+            $this->records->createPaymentAudit($authorisation, $transaction, $response, 'set purchase: redirect');
             $this->session->save();
 
             /** @var RedirectResponseInterface $response */
