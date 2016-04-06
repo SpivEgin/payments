@@ -8,7 +8,6 @@ use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Exception\GenericException;
 use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
 use Bolt\Extension\Bolt\Payments\GatewayManager;
-use Bolt\Extension\Bolt\Payments\Storage;
 use Bolt\Extension\Bolt\Payments\Storage\Records;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
@@ -183,7 +182,6 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
-
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
@@ -225,7 +223,6 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
-
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
@@ -295,7 +292,6 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
-
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
@@ -507,7 +503,6 @@ class RequestProcessor
             throw new RuntimeException(sprintf('Gateway %s does not support "createCard".', $name));
         }
 
-
         // load POST data
         $card = new CreditCard($request->request->get('card'));
         $params = $request->request->get('params');
@@ -530,7 +525,6 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
-
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
@@ -612,7 +606,6 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
-
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
@@ -685,7 +678,6 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
-
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
@@ -723,7 +715,7 @@ class RequestProcessor
     /**
      * Return a combined array of parameters to be passed to the gateway.
      *
-     * @param string                  $name
+     * @param string      $name
      * @param Transaction $transaction
      *
      * @return array

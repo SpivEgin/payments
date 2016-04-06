@@ -4,9 +4,8 @@ namespace Bolt\Extension\Bolt\Payments\Provider;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
-use Bolt\Extension\Bolt\Payments\Transaction;
 use Bolt\Extension\Bolt\Payments\Storage;
-use Pimple as Container;
+use Bolt\Extension\Bolt\Payments\Transaction;
 use Ramsey\Uuid\Uuid;
 use Silex\Application;
 use Silex\ServiceProviderInterface;
@@ -55,7 +54,7 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                     $app['payments.records'],
                     $app['payments.transaction.manager'],
                     $app['twig'],
-                    $app['session']                    
+                    $app['session']
                 );
             }
         );

@@ -23,7 +23,7 @@ class Records
     /**
      * Constructor.
      *
-     * @param Repository\Payment           $payment
+     * @param Repository\Payment      $payment
      * @param Repository\PaymentAudit $paymentAudit
      */
     public function __construct(Repository\Payment $payment, Repository\PaymentAudit $paymentAudit)

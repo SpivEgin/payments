@@ -6,7 +6,6 @@ use Bolt\Events\ControllerEvents;
 use Bolt\Extension\AbstractExtension;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
 use Bolt\Extension\Bolt\Payments\Provider\PaymentsServiceProvider;
-use Bolt\Extension\Bolt\Payments\Storage;
 use Bolt\Extension\ConfigTrait;
 use Bolt\Extension\ControllerMountTrait;
 use Bolt\Extension\DatabaseSchemaTrait;
@@ -244,7 +243,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
             ],
             'templates'  => [
                 'parent'   => 'layout.twig',
-                'pages' => [
+                'pages'    => [
                     'payment'  => 'payment.twig',
                     'address'  => 'address.twig',
                     'complete' => 'complete.twig',

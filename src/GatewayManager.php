@@ -147,7 +147,6 @@ class GatewayManager
         return static::getSessionPrefix($gatewayName) . '.' . $type;
     }
 
-
     /**
      * Return the valid prefix for session keys.
      *

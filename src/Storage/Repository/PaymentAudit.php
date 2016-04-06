@@ -2,7 +2,6 @@
 
 namespace Bolt\Extension\Bolt\Payments\Storage\Repository;
 
-use Bolt\Extension\Bolt\Payments\Storage\Entity;
 use Bolt\Storage\Repository;
 
 /**

@@ -12,7 +12,9 @@ class Helper
     /**
      * Singleton Constructor.
      */
-    private function __construct() {}
+    private function __construct()
+    {
+    }
 
     /**
      * Resolve a provider string to the case sensitive version.

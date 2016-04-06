@@ -3,7 +3,6 @@
 namespace Bolt\Extension\Bolt\Payments\Transaction;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
-use Bolt\Extension\Bolt\Payments\Storage;
 use Closure;
 
 /**

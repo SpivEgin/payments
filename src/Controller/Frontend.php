@@ -2,8 +2,8 @@
 
 namespace Bolt\Extension\Bolt\Payments\Controller;
 
-use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Members\AccessControl\Session as MembersSession;
+use Bolt\Extension\Bolt\Payments\Config\Config;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;

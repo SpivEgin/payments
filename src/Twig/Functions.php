@@ -7,8 +7,8 @@ use Bolt\Extension\Bolt\Payments\GatewayManager;
 use Bolt\Extension\Bolt\Payments\Transaction;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
-use Twig_Extension as TwigExtension;
 use Twig_Environment as TwigEnvironment;
+use Twig_Extension as TwigExtension;
 use Twig_Markup as TwigMarkup;
 use Twig_SimpleFunction as TwigSimpleFunction;
 
@@ -79,7 +79,7 @@ class Functions extends TwigExtension
     {
         $context = [
             'payment_url' => $this->config->getTransactionUrl($gatewayName, 'purchase'),
-            'method' => $method,
+            'method'      => $method,
         ];
         $html = $twig->render($this->config->getTemplate('button', 'payment'), $context);
 
