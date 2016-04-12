@@ -72,14 +72,16 @@ class Functions extends TwigExtension
      * @param TwigEnvironment $twig
      * @param string          $gatewayName
      * @param string          $method
+     * @param array           $hiddenInputs
      *
      * @return TwigMarkup
      */
-    public function getPaymentButton(TwigEnvironment $twig, $gatewayName, $method = 'GET')
+    public function getPaymentButton(TwigEnvironment $twig, $gatewayName, $method = 'GET', array $hiddenInputs = [])
     {
         $context = [
             'payment_url' => $this->config->getTransactionUrl($gatewayName, 'purchase'),
             'method'      => $method,
+            'hidden'      => $hiddenInputs,
         ];
         $html = $twig->render($this->config->getTemplate('button', 'payment'), $context);
 

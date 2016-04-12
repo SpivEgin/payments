@@ -1,3 +1,6 @@
 <form action="{{ payment_url }}" enctype="text/plain" method="{{ method }}">
+    {% for name,value in hidden %}
+        <input type="hidden" id="{{ name }}" name="{{ name }}" value="{{ value }}">
+    {% endfor %}
     <button class="button" type="submit">Purchase</button>
 </form>
