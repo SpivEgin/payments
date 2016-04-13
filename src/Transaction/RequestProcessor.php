@@ -59,6 +59,7 @@ class RequestProcessor
      * @param Config                   $config
      * @param Records                  $records
      * @param Manager                  $transManager
+     * @param GatewayManager           $gatewayManager
      * @param TwigEnvironment          $twig
      * @param Session                  $session
      * @param TraceableEventDispatcher $dispatcher
@@ -67,6 +68,7 @@ class RequestProcessor
         Config $config,
         Records $records,
         Manager $transManager,
+        GatewayManager $gatewayManager,
         TwigEnvironment $twig,
         Session $session,
         TraceableEventDispatcher $dispatcher
@@ -74,11 +76,10 @@ class RequestProcessor
         $this->config = $config;
         $this->records = $records;
         $this->transManager = $transManager;
+        $this->gatewayManager = $gatewayManager;
         $this->twig = $twig;
         $this->session = $session;
         $this->dispatcher = $dispatcher;
-
-        $this->gatewayManager = new GatewayManager($config, $session);
     }
 
     /**
