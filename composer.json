@@ -64,6 +64,7 @@
     "autoload": {
         "psr-4": {
             "Bolt\\Extension\\Bolt\\Payments\\": "src",
+            "Bolt\\Extension\\Bolt\\ShoppingCart\\" : "lib/bolt/cart/src",
             "Omnipay\\": "lib/omnipay/common/src/Omnipay",
             "Omnipay\\AuthorizeNet\\": "lib/omnipay/authorizenet/src",
             "Omnipay\\Buckaroo\\": "lib/omnipay/buckaroo/src",
