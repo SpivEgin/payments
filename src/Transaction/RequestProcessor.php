@@ -5,6 +5,8 @@ namespace Bolt\Extension\Bolt\Payments\Transaction;
 use Bolt\Extension\Bolt\Members\AccessControl\Authorisation;
 use Bolt\Extension\Bolt\Payments\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Config\Config;
+use Bolt\Extension\Bolt\Payments\Event\PaymentEvent;
+use Bolt\Extension\Bolt\Payments\Event\PaymentEvents;
 use Bolt\Extension\Bolt\Payments\Exception\GenericException;
 use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
 use Bolt\Extension\Bolt\Payments\GatewayManager;
@@ -13,6 +15,7 @@ use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
 use Omnipay\Common\Message\RedirectResponseInterface;
 use Omnipay\Common\Message\ResponseInterface;
+use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
@@ -47,28 +50,33 @@ class RequestProcessor
     protected $gatewayManager;
     /** @var Manager */
     private $transManager;
+    /** @var TraceableEventDispatcher */
+    private $dispatcher;
 
     /**
      * Constructor.
      *
-     * @param Config          $config
-     * @param Records         $records
-     * @param Manager         $transManager
-     * @param TwigEnvironment $twig
-     * @param Session         $session
+     * @param Config                   $config
+     * @param Records                  $records
+     * @param Manager                  $transManager
+     * @param TwigEnvironment          $twig
+     * @param Session                  $session
+     * @param TraceableEventDispatcher $dispatcher
      */
     public function __construct(
         Config $config,
         Records $records,
         Manager $transManager,
         TwigEnvironment $twig,
-        Session $session
+        Session $session,
+        TraceableEventDispatcher $dispatcher
     ) {
         $this->config = $config;
         $this->records = $records;
         $this->transManager = $transManager;
         $this->twig = $twig;
         $this->session = $session;
+        $this->dispatcher = $dispatcher;
 
         $this->gatewayManager = new GatewayManager($config, $session);
     }
@@ -383,10 +391,14 @@ class RequestProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
+
+        $event = new PaymentEvent($transaction);
         if ($response->isSuccessful()) {
+            $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_SUCCESS, $event);
             $this->records->createPayment($authorisation, $gateway, $transaction);
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'set purchase: success');
         } elseif ($response->isRedirect()) {
+            $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_INITIATE, $event);
             $this->records->createPayment($authorisation, $gateway, $transaction);
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'set purchase: redirect');
             $this->session->save();
@@ -394,6 +406,7 @@ class RequestProcessor
             /** @var RedirectResponseInterface $response */
             $response->redirect();
         } else {
+            $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_FAILURE, $event);
             throw new ProcessorException($response->getMessage());
         }
 
@@ -439,16 +452,19 @@ class RequestProcessor
 
         $payment = $this->records->getCustomerPayment($authorisation->getGuid(), $gateway->getShortName(), $transaction->getTransactionId());
 
+        $event = new PaymentEvent($transaction);
         if ($response->isSuccessful()) {
             $payment->setStatus('paid');
             $this->records->savePayment($payment);
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: success');
+            $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_SUCCESS, $event);
         } elseif ($response->isRedirect()) {
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: redirect');
             $this->session->save();
             /** @var RedirectResponseInterface $response */
             $response->redirect();
         } else {
+            $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_FAILURE, $event);
             throw new ProcessorException($response->getMessage());
         }
 

@@ -42,7 +42,7 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                     $app['resources']->getUrl('rooturl'),
                     $this->config['mountpoint']
                 );
-                
+
                 return new Config($this->config, $baseUrl);
             }
         );
@@ -54,7 +54,8 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                     $app['payments.records'],
                     $app['payments.transaction.manager'],
                     $app['twig'],
-                    $app['session']
+                    $app['session'],
+                    $app['dispatcher']
                 );
             }
         );
@@ -83,7 +84,7 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                 }
             );
         }
-        
+
         $app['payments.transaction.manager'] = $app->share(
             function ($app) {
                 return new Transaction\Manager($app['payments.config'], $app['payments.transaction.id_generator']);
