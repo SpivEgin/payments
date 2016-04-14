@@ -55,7 +55,6 @@ class PaymentsServiceProvider implements ServiceProviderInterface
                     $app['payments.records'],
                     $app['payments.transaction.manager'],
                     $app['payments.gateway.manager'],
-                    $app['twig'],
                     $app['session'],
                     $app['dispatcher']
                 );

@@ -3,13 +3,19 @@
 namespace Bolt\Extension\Bolt\Payments\Controller;
 
 use Bolt\Extension\Bolt\Members\AccessControl\Session as MembersSession;
+use Bolt\Extension\Bolt\Payments\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Config\Config;
+use Bolt\Extension\Bolt\Payments\GatewayManager;
+use Bolt\Extension\Bolt\Payments\Transaction\Manager as TransactionManager;;
+use Bolt\Extension\Bolt\Payments\Transaction\RequestProcessor;
+use Bolt\Extension\Bolt\Payments\Transaction\Transaction;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
 use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
+use Twig_Environment as TwigEnvironment;
 
 /**
  * Frontend controller.
@@ -20,6 +26,12 @@ class Frontend implements ControllerProviderInterface
 {
     /** @var Config */
     protected $config;
+    /** @var TwigEnvironment */
+    protected $twig;
+    /** @var GatewayManager */
+    protected $gatewayManager;
+    /** @var TransactionManager */
+    protected $transManager;
 
     /**
      * Constructor.
@@ -36,6 +48,10 @@ class Frontend implements ControllerProviderInterface
      */
     public function connect(Application $app)
     {
+        $this->twig = $app['twig'];
+        $this->gatewayManager = $app['payments.gateway.manager'];
+        $this->transManager = $app['payments.transaction.manager'];
+
         /** @var $ctr ControllerCollection */
         $ctr = $app['controllers_factory'];
 
@@ -130,16 +146,19 @@ class Frontend implements ControllerProviderInterface
      */
     public function settings(Application $app, Request $request, $name)
     {
-        return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
-
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if ($request->isMethod('POST')) {
-            $app['payments.processor']->setSettings($request, $name);
+            $app['payments.processor']->setSettings($request, $gateway);
             $target = $request->getBaseUrl() . $request->getPathInfo();
 
             return new RedirectResponse($target);
         }
 
-        $html = $app['payments.processor']->getSettings($name);
+        $gateway = $app['payments.processor']->getSettings($gateway);
+        $context = [
+            'settings' => $gateway->getParameters(),
+        ];
+        $html = $this->render($gateway, 'gateway.twig', $context);
 
         return new Response($html);
     }
@@ -157,13 +176,24 @@ class Frontend implements ControllerProviderInterface
     {
         return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
 
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if ($request->isMethod('POST')) {
-            $html = $app['payments.processor']->setAuthorize($request, $name);
-
-            return new Response($html);
+            $response = $app['payments.processor']->setAuthorize($request, $gateway);
+            $template = $this->config->getTemplate('pages', 'payment');
+        } else {
+            $response = $app['payments.processor']->getAuthorize($request, $gateway);
+            $template = $this->config->getTemplate('pages', 'complete');
         }
 
-        $html = $app['payments.processor']->getAuthorize($request, $name);
+        /** @var Transaction $transaction */
+        $transaction = $this->gatewayManager->getSessionValue($name, RequestProcessor::TYPE_AUTHORIZE);
+        $context = [
+            'method'   => 'authorize',
+            'params'   => $transaction,
+            'card'     => $transaction->getCard()->getParameters(),
+            'response' => $response,
+        ];
+        $html = $this->render($gateway, $template, $context);
 
         return new Response($html);
     }
@@ -180,7 +210,13 @@ class Frontend implements ControllerProviderInterface
     {
         return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
 
-        $html = $app['payments.processor']->completeAuthorize($name);
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $response = $app['payments.processor']->completeAuthorize($gateway);
+        $template = $this->config->getTemplate('pages', 'complete');
+        $context = [
+            'response' => $response,
+        ];
+        $html = $this->render($gateway, $template, $context);
 
         return new Response($html);
     }
@@ -198,13 +234,25 @@ class Frontend implements ControllerProviderInterface
     {
         return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
 
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if ($request->isMethod('POST')) {
-            $html = $app['payments.processor']->setCapture($request, $name);
+            $response = $app['payments.processor']->setCapture($request, $gateway);
+            $template = $this->config->getTemplate('pages', 'complete');
+            $context = [
+                'response' => $response,
+            ];
+
+            $html = $this->render($gateway, $template, $context);
 
             return new Response($html);
         }
 
-        $html = $app['payments.processor']->getCapture($name);
+        $template = $this->config->getTemplate('pages', 'payment');
+        $context = [
+            'method'  => 'capture',
+            'params'  => $this->gatewayManager->getSessionValue($name, RequestProcessor::TYPE_CAPTURE, $this->transManager->createTransaction()),
+        ];
+        $html = $this->render($gateway, $template, $context);
 
         return new Response($html);
     }
@@ -220,14 +268,27 @@ class Frontend implements ControllerProviderInterface
      */
     public function purchase(Application $app, Request $request, $name)
     {
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if ($request->isMethod('POST')) {
             $authorisation = $app['members.session']->getAuthorisation();
-            $html = $app['payments.processor']->setPurchase($request, $name, $authorisation);
+            $response = $app['payments.processor']->setPurchase($request, $gateway, $authorisation);
+            $template = $this->config->getTemplate('pages', 'complete');
+            $context = [
+                'response' => $response,
+            ];
+            $html = $this->render($gateway, $template, $context);
 
             return new Response($html);
         }
 
-        $html = $app['payments.processor']->getPurchase($request, $name);
+        $transaction = $app['payments.processor']->getPurchase($request, $gateway);
+        $template = $this->config->getTemplate('pages', 'payment');
+        $context = [
+            'method'  => 'purchase',
+            'params'  => $transaction,
+            'card'    => $transaction->getCard()->getParameters(),
+        ];
+        $html = $this->render($gateway, $template, $context);
 
         return new Response($html);
     }
@@ -245,8 +306,14 @@ class Frontend implements ControllerProviderInterface
      */
     public function completePurchase(Application $app, Request $request, $name)
     {
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         $authorisation = $app['members.session']->getAuthorisation();
-        $html = $app['payments.processor']->completePurchase($request, $name, $authorisation);
+        $response = $app['payments.processor']->completePurchase($request, $gateway, $authorisation);
+        $template = $this->config->getTemplate('pages', 'complete');
+        $context = [
+            'response' => $response,
+        ];
+        $html = $this->render($gateway, $template, $context);
 
         return new Response($html);
     }
@@ -264,13 +331,27 @@ class Frontend implements ControllerProviderInterface
     {
         return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
 
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if ($request->isMethod('POST')) {
-            $html = $app['payments.processor']->setCreateCard($request, $name);
+            $response = $app['payments.processor']->setCreateCard($request, $gateway);
+            $template = $this->config->getTemplate('pages', 'complete');
+            $context = [
+                'response' => $response,
+            ];
+
+            $html = $this->render($gateway, $template, $context);
 
             return new Response($html);
         }
 
-        $html = $app['payments.processor']->getCreateCard($name);
+        $transaction = $app['payments.processor']->getCreateCard($gateway);
+        $template = $this->config->getTemplate('pages', 'payment');
+        $context = [
+            'method'  => 'createCard',
+            'params'  => $transaction,
+            'card'    => $transaction->getCard()->getParameters(),
+        ];
+        $html = $this->render($gateway, $template, $context);
 
         return new Response($html);
     }
@@ -288,13 +369,26 @@ class Frontend implements ControllerProviderInterface
     {
         return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
 
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if ($request->isMethod('POST')) {
-            $html = $app['payments.processor']->setUpdateCard($request, $name);
+            $response = $app['payments.processor']->setUpdateCard($request, $gateway);
+            $template = $this->config->getTemplate('pages', 'complete');
+            $context = [
+                'response' => $response,
+            ];
+            $html = $this->render($gateway, $template, $context);
 
             return new Response($html);
         }
 
-        $html = $app['payments.processor']->getUpdateCard($name);
+        $transaction = $app['payments.processor']->getUpdateCard($gateway);
+        $template = $this->config->getTemplate('pages', 'payment');
+        $context = [
+            'method'  => 'updateCard',
+            'params'  => $transaction,
+            'card'    => $transaction->getCard()->getParameters(),
+        ];
+        $html = $this->render($gateway, $template, $context);
 
         return new Response($html);
     }
@@ -312,14 +406,47 @@ class Frontend implements ControllerProviderInterface
     {
         return new Response('Not implemented yet', Response::HTTP_FORBIDDEN);
 
+        $gateway = $this->gatewayManager->initializeSessionGateway($name);
         if ($request->isMethod('POST')) {
-            $html = $app['payments.processor']->setDeleteCard($request, $name);
+            $response = $app['payments.processor']->setDeleteCard($request, $gateway);
+
+            $template = $this->config->getTemplate('pages', 'complete');
+            $context = [
+                'response' => $response,
+            ];
+
+            $html = $this->render($gateway, $template, $context);
 
             return new Response($html);
         }
 
-        $html = $app['payments.processor']->getDeleteCard($name);
+        $transaction = $app['payments.processor']->getDeleteCard($gateway);
+        $template = $this->config->getTemplate('pages', 'payment');
+        $context = [
+            'method'  => 'deleteCard',
+            'params'  => $transaction,
+        ];
+        $html = $this->render($gateway, $template, $context);
 
         return new Response($html);
+    }
+
+    /**
+     * Render an transaction specific template.
+     *
+     * @param CombinedGatewayInterface $gateway
+     * @param string                   $template
+     * @param array                    $context
+     *
+     * @return string
+     */
+    private function render($gateway, $template, array $context = [])
+    {
+        $context += [
+            'gateway'  => $gateway,
+            'settings' => $gateway->getParameters(),
+        ];
+
+        return $this->twig->render($template, $context);
     }
 }

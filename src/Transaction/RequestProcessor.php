@@ -16,10 +16,8 @@ use Omnipay\Common\Exception\RuntimeException;
 use Omnipay\Common\Message\RedirectResponseInterface;
 use Omnipay\Common\Message\ResponseInterface;
 use Symfony\Component\EventDispatcher\Debug\TraceableEventDispatcher;
-use Symfony\Component\HttpFoundation\RedirectResponse;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\Session;
-use Twig_Environment as TwigEnvironment;
 
 /**
  * Transaction processing class.
@@ -40,8 +38,6 @@ class RequestProcessor
     protected $config;
     /** @var Records */
     protected $records;
-    /** @var TwigEnvironment */
-    protected $twig;
     /** @var Session */
     protected $session;
     /** @var string */
@@ -60,7 +56,6 @@ class RequestProcessor
      * @param Records                  $records
      * @param Manager                  $transManager
      * @param GatewayManager           $gatewayManager
-     * @param TwigEnvironment          $twig
      * @param Session                  $session
      * @param TraceableEventDispatcher $dispatcher
      */
@@ -69,7 +64,6 @@ class RequestProcessor
         Records $records,
         Manager $transManager,
         GatewayManager $gatewayManager,
-        TwigEnvironment $twig,
         Session $session,
         TraceableEventDispatcher $dispatcher
     ) {
@@ -77,7 +71,6 @@ class RequestProcessor
         $this->records = $records;
         $this->transManager = $transManager;
         $this->gatewayManager = $gatewayManager;
-        $this->twig = $twig;
         $this->session = $session;
         $this->dispatcher = $dispatcher;
     }
@@ -85,31 +78,26 @@ class RequestProcessor
     /**
      * Return gateway settings.
      *
-     * @param string $name
+     * @param CombinedGatewayInterface $gateway
      *
-     * @return string
+     * @return CombinedGatewayInterface
      */
-    public function getSettings($name)
+    public function getSettings(CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
-        $context = [
-            'settings' => $gateway->getParameters(),
-        ];
+        $name = $gateway->getName();
 
-        return $this->render($gateway, 'gateway.twig', $context);
+        return $gateway;
     }
 
     /**
      * Save gateway settings
      *
-     * @param Request $request
-     * @param string  $name
-     *
-     * @return RedirectResponse
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
      */
-    public function setSettings(Request $request, $name)
+    public function setSettings(Request $request, $gateway)
     {
-        $gateway = $this->gatewayManager->initializeRequestGateway($name, $request);
+        $name = $gateway->getName();
 
         // save gateway settings in session
         $this->gatewayManager->setSessionValue($name, $name, $gateway->getParameters());
@@ -121,15 +109,14 @@ class RequestProcessor
     /**
      * Request GET handler to authorize an amount on the customer's card.
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
      *
-     * @return string
+     * @return Transaction
      */
-    public function getAuthorize(Request $request, $name)
+    public function getAuthorize(Request $request, CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
-
+        $name = $gateway->getName();
         $cardData = $this->gatewayManager->getSessionValue($name, static::TYPE_CARD);
         $card = new CreditCard($cardData);
 
@@ -141,29 +128,22 @@ class RequestProcessor
             ->setCard($card)
         ;
 
-        $template = $this->config->getTemplate('pages', 'payment');
-        $context = [
-            'method'  => 'authorize',
-            'params'  => $transaction,
-            'card'    => $transaction->getCard()->getParameters(),
-        ];
-
-        return $this->render($gateway, $template, $context);
+        return $transaction;
     }
 
     /**
      * Request POST handler to authorize an amount on the customer's card.
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
      *
      * @throws GenericException
      *
-     * @return string
+     * @return ResponseInterface
      */
-    public function setAuthorize(Request $request, $name)
+    public function setAuthorize(Request $request, $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
         if (!$gateway->supportsAuthorize()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "authorize".', $name));
         }
@@ -191,33 +171,27 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
+            return $response;
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
-        } else {
-            throw new ProcessorException($response->getMessage());
         }
 
-        $template = $this->config->getTemplate('pages', 'complete');
-        $context = [
-            'response' => $response,
-        ];
-
-        return $this->render($gateway, $template, $context);
+        throw new ProcessorException($response->getMessage());
     }
 
     /**
      * Handle return from off-site gateways after authorization
      *
-     * @param string $name
+     * @param CombinedGatewayInterface $gateway
      *
      * @throws GenericException
      *
-     * @return string
+     * @return ResponseInterface
      */
-    public function completeAuthorize($name)
+    public function completeAuthorize(CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
         if (!$gateway->supportsCompleteAuthorize()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "completeAuthorize".', $name));
         }
@@ -232,54 +206,28 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
+            return $response;
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
-        } else {
-            throw new ProcessorException($response->getMessage());
         }
 
-        $template = $this->config->getTemplate('pages', 'complete');
-        $context = [
-            'response' => $response,
-        ];
-
-        return $this->render($gateway, $template, $context);
-    }
-
-    /**
-     * Request GET handler to capture an amount you have previously authorized.
-     *
-     * @param string $name
-     *
-     * @return string
-     */
-    public function getCapture($name)
-    {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
-
-        $template = $this->config->getTemplate('pages', 'payment');
-        $context = [
-            'method'  => 'capture',
-            'params'  => $this->gatewayManager->getSessionValue($name, static::TYPE_CAPTURE, $this->transManager->createTransaction()),
-        ];
-
-        return $this->render($gateway, $template, $context);
+        throw new ProcessorException($response->getMessage());
     }
 
     /**
      * Request POST handler to capture an amount you have previously authorized.
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
      *
      * @throws GenericException
      *
-     * @return string
+     * @return ResponseInterface
      */
-    public function setCapture(Request $request, $name)
+    public function setCapture(Request $request, CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
         if (!$gateway->supportsCapture()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "capture".', $name));
         }
@@ -301,33 +249,26 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
+            return $response;
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
-        } else {
-            throw new ProcessorException($response->getMessage());
         }
 
-        $template = $this->config->getTemplate('pages', 'complete');
-        $context = [
-            'response' => $response,
-        ];
-
-        return $this->render($gateway, $template, $context);
+        throw new ProcessorException($response->getMessage());
     }
 
     /**
      * Request GET handler to authorize and immediately capture an amount on the customer's card.
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
      *
-     * @return string
+     * @return Transaction
      */
-    public function getPurchase(Request $request, $name)
+    public function getPurchase(Request $request, CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
-
+        $name = $gateway->getName();
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, $this->transManager->createTransaction());
@@ -336,30 +277,23 @@ class RequestProcessor
         ;
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
 
-        $template = $this->config->getTemplate('pages', 'payment');
-        $context = [
-            'method'  => 'purchase',
-            'params'  => $transaction,
-            'card'    => $transaction->getCard()->getParameters(),
-        ];
-
-        return $this->render($gateway, $template, $context);
+        return $transaction;
     }
 
     /**
      * Request POST handler to authorize and immediately capture an amount on the customer's card.
      *
-     * @param Request       $request
-     * @param string        $name
-     * @param Authorisation $authorisation
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
+     * @param Authorisation            $authorisation
      *
      * @throws GenericException
      *
-     * @return string
+     * @return ResponseInterface
      */
-    public function setPurchase(Request $request, $name, Authorisation $authorisation)
+    public function setPurchase(Request $request, CombinedGatewayInterface $gateway, Authorisation $authorisation)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
         if (!$gateway->supportsPurchase()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "purchase".', $name));
         }
@@ -392,7 +326,6 @@ class RequestProcessor
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_CARD, $card);
 
-
         $event = new PaymentEvent($transaction);
         if ($response->isSuccessful()) {
             $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_SUCCESS, $event);
@@ -411,12 +344,7 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
-        $template = $this->config->getTemplate('pages', 'complete');
-        $context = [
-            'response' => $response,
-        ];
-
-        return $this->render($gateway, $template, $context);
+        return $response;
     }
 
     /**
@@ -424,17 +352,17 @@ class RequestProcessor
      *
      * NOTE: This won't work for gateways which require an internet-accessible URL (yet)
      *
-     * @param Request       $request
-     * @param string        $name
-     * @param Authorisation $authorisation
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
+     * @param Authorisation            $authorisation
      *
      * @throws GenericException
      *
-     * @return string
+     * @return ResponseInterface
      */
-    public function completePurchase(Request $request, $name, Authorisation $authorisation)
+    public function completePurchase(Request $request, CombinedGatewayInterface $gateway, Authorisation $authorisation)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
         if (!$gateway->supportsCompletePurchase()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "completePurchase".', $name));
         }
@@ -469,53 +397,40 @@ class RequestProcessor
             throw new ProcessorException($response->getMessage());
         }
 
-        $template = $this->config->getTemplate('pages', 'complete');
-        $context = [
-            'response' => $response,
-        ];
-
-        return $this->render($gateway, $template, $context);
+        return $response;
     }
 
     /**
      * Create gateway create Credit Card.
      *
-     * @param string $name
+     * @param CombinedGatewayInterface $gateway
      *
-     * @return string
+     * @return Transaction
      */
-    public function getCreateCard($name)
+    public function getCreateCard(CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
-
+        $name = $gateway->getName();
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_CREATE, $this->transManager->createTransaction());
         $transaction->setCard($card);
 
-        $template = $this->config->getTemplate('pages', 'payment');
-        $context = [
-            'method'  => 'createCard',
-            'params'  => $transaction,
-            'card'    => $transaction->getCard()->getParameters(),
-        ];
-
-        return $this->render($gateway, $template, $context);
+        return $transaction;
     }
 
     /**
      * Submit gateway create Credit Card.
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
      *
      * @throws GenericException
      *
-     * @return string
+     * @return ResponseInterface
      */
-    public function setCreateCard(Request $request, $name)
+    public function setCreateCard(Request $request, CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
         if (!$gateway->supportsCreateCard()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "createCard".', $name));
         }
@@ -542,60 +457,46 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
+            return $response;
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
-        } else {
-            throw new ProcessorException($response->getMessage());
         }
 
-        $template = $this->config->getTemplate('pages', 'complete');
-        $context = [
-            'response' => $response,
-        ];
-
-        return $this->render($gateway, $template, $context);
+        throw new ProcessorException($response->getMessage());
     }
 
     /**
      * Create gateway update Credit Card.
      *
-     * @param string $name
+     * @param CombinedGatewayInterface $gateway
      *
-     * @return string
+     * @return Transaction
      */
-    public function getUpdateCard($name)
+    public function getUpdateCard(CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
-
+        $name = $gateway->getName();
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_UPDATE, $this->transManager->createTransaction());
         $transaction->setCard($card);
 
-        $template = $this->config->getTemplate('pages', 'payment');
-        $context = [
-            'method'  => 'updateCard',
-            'params'  => $transaction,
-            'card'    => $transaction->getCard()->getParameters(),
-        ];
-
-        return $this->render($gateway, $template, $context);
+        return $transaction;
     }
 
     /**
      * Submit gateway update Credit Card.
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
      *
      * @throws GenericException
      *
-     * @return string
+     * @return ResponseInterface
      */
-    public function setUpdateCard(Request $request, $name)
+    public function setUpdateCard(Request $request, CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
         if (!$gateway->supportsUpdateCard()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "updateCard".', $name));
         }
@@ -623,57 +524,45 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
+            return $response;
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
-        } else {
-            throw new ProcessorException($response->getMessage());
         }
 
-        $template = $this->config->getTemplate('pages', 'complete');
-        $context = [
-            'response' => $response,
-        ];
-
-        return $this->render($gateway, $template, $context);
+        throw new ProcessorException($response->getMessage());
     }
 
     /**
      * Create gateway delete Credit Card.
      *
-     * @param string $name
+     * @param CombinedGatewayInterface $gateway
      *
-     * @return string
+     * @return Transaction
      */
-    public function getDeleteCard($name)
+    public function getDeleteCard(CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
 
         /** @var Transaction $transaction */
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_DELETE, $this->transManager->createTransaction());
 
-        $template = $this->config->getTemplate('pages', 'payment');
-        $context = [
-            'method'  => 'deleteCard',
-            'params'  => $transaction,
-        ];
-
-        return $this->render($gateway, $template, $context);
+        return $transaction;
     }
 
     /**
      * Submit gateway delete Credit Card.
      *
-     * @param Request $request
-     * @param string  $name
+     * @param Request                  $request
+     * @param CombinedGatewayInterface $gateway
      *
      * @throws GenericException
      *
-     * @return string
+     * @return ResponseInterface
      */
-    public function setDeleteCard(Request $request, $name)
+    public function setDeleteCard(Request $request, CombinedGatewayInterface $gateway)
     {
-        $gateway = $this->gatewayManager->initializeSessionGateway($name);
+        $name = $gateway->getName();
         if (!$gateway->supportsDeleteCard()) {
             throw new RuntimeException(sprintf('Gateway %s does not support "deleteCard".', $name));
         }
@@ -695,38 +584,13 @@ class RequestProcessor
         }
 
         if ($response->isSuccessful()) {
+            return $response;
         } elseif ($response->isRedirect()) {
             /** @var RedirectResponseInterface $response */
             $response->redirect();
-        } else {
-            throw new ProcessorException($response->getMessage());
         }
 
-        $template = $this->config->getTemplate('pages', 'complete');
-        $context = [
-            'response' => $response,
-        ];
-
-        return $this->render($gateway, $template, $context);
-    }
-
-    /**
-     * Render an transaction specific template.
-     *
-     * @param CombinedGatewayInterface $gateway
-     * @param string                   $template
-     * @param array                    $context
-     *
-     * @return string
-     */
-    protected function render($gateway, $template, array $context = [])
-    {
-        $context += [
-            'gateway'  => $gateway,
-            'settings' => $gateway->getParameters(),
-        ];
-
-        return $this->twig->render($template, $context);
+        throw new ProcessorException($response->getMessage());
     }
 
     /**
