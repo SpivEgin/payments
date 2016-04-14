@@ -3,7 +3,7 @@
 namespace Bolt\Extension\Bolt\Payments\Controller;
 
 use Bolt\Extension\Bolt\Members\AccessControl\Session as MembersSession;
-use Bolt\Extension\Bolt\Payments\CombinedGatewayInterface;
+use Bolt\Extension\Bolt\Payments\Gateway\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Gateway\Manager as GatewayManager;
 use Bolt\Extension\Bolt\Payments\Transaction\Manager as TransactionManager;;

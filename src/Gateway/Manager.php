@@ -138,7 +138,7 @@ class Manager
             ->initialize($providerConfig)
         ;
 
-        return $gateway;
+        return new GatewayProxy($gateway);
     }
 
     /**

@@ -3,9 +3,9 @@
 namespace Bolt\Extension\Bolt\Payments\Storage;
 
 use Bolt\Extension\Bolt\Members\AccessControl\Authorisation;
+use Bolt\Extension\Bolt\Payments\Gateway\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Transaction\Transaction;
 use Carbon\Carbon;
-use Omnipay\Common\AbstractGateway;
 use Omnipay\Common\Message\ResponseInterface;
 
 /**
@@ -107,13 +107,13 @@ class Records
     }
 
     /**
-     * @param Authorisation   $authorisation
-     * @param AbstractGateway $gateway
-     * @param Transaction     $transaction
+     * @param Authorisation            $authorisation
+     * @param CombinedGatewayInterface $gateway
+     * @param Transaction              $transaction
      *
      * @return bool
      */
-    public function createPayment(Authorisation $authorisation, AbstractGateway $gateway, Transaction $transaction)
+    public function createPayment(Authorisation $authorisation, CombinedGatewayInterface $gateway, Transaction $transaction)
     {
         $payment = new Entity\Payment();
 

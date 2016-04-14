@@ -1,6 +1,6 @@
 <?php
 
-namespace Bolt\Extension\Bolt\Payments;
+namespace Bolt\Extension\Bolt\Payments\Gateway;
 
 use Omnipay\Common\GatewayInterface;
 use Omnipay\Common\Message\AbstractRequest;
