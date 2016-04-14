@@ -4,7 +4,7 @@ namespace Bolt\Extension\Bolt\Payments\Provider;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
 use Bolt\Extension\Bolt\Payments\Controller\Frontend;
-use Bolt\Extension\Bolt\Payments\GatewayManager;
+use Bolt\Extension\Bolt\Payments\Gateway;
 use Bolt\Extension\Bolt\Payments\Storage;
 use Bolt\Extension\Bolt\Payments\Transaction;
 use Ramsey\Uuid\Uuid;
@@ -94,7 +94,7 @@ class PaymentsServiceProvider implements ServiceProviderInterface
 
         $app['payments.gateway.manager'] = $app->share(
             function ($app) {
-                return new GatewayManager($app['payments.config'], $app['session']);
+                return new Gateway\Manager($app['payments.config'], $app['session']);
             }
         );
     }

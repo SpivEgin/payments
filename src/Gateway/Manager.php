@@ -1,8 +1,9 @@
 <?php
 
-namespace Bolt\Extension\Bolt\Payments;
+namespace Bolt\Extension\Bolt\Payments\Gateway;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
+use Bolt\Extension\Bolt\Payments\Helper;
 use Omnipay\Common\GatewayFactory;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;
@@ -12,7 +13,7 @@ use Symfony\Component\HttpFoundation\Session\SessionInterface;
  *
  * @author Gawain Lynch <gawain.lynch@gmail.com>
  */
-class GatewayManager
+class Manager
 {
     /** @var Config */
     protected $config;
@@ -68,7 +69,7 @@ class GatewayManager
      * @param string $type
      * @param string $value
      *
-     * @return GatewayManager
+     * @return Manager
      */
     public function setSessionValue($name, $type, $value)
     {

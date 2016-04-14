@@ -3,7 +3,7 @@
 namespace Bolt\Extension\Bolt\Payments\Twig;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
-use Bolt\Extension\Bolt\Payments\GatewayManager;
+use Bolt\Extension\Bolt\Payments\Gateway\Manager as GatewayManager;
 use Bolt\Extension\Bolt\Payments\Transaction;
 use Symfony\Component\HttpFoundation\RequestStack;
 use Symfony\Component\HttpFoundation\Session\SessionInterface;

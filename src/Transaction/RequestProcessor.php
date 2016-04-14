@@ -9,7 +9,7 @@ use Bolt\Extension\Bolt\Payments\Event\PaymentEvent;
 use Bolt\Extension\Bolt\Payments\Event\PaymentEvents;
 use Bolt\Extension\Bolt\Payments\Exception\GenericException;
 use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
-use Bolt\Extension\Bolt\Payments\GatewayManager;
+use Bolt\Extension\Bolt\Payments\Gateway\Manager as GatewayManager;
 use Bolt\Extension\Bolt\Payments\Storage\Records;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
