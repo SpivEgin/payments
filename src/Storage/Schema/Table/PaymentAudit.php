@@ -21,7 +21,7 @@ class PaymentAudit extends BaseTable
         $this->table->addColumn('customer_id',    'guid',       []);
         $this->table->addColumn('transaction_id', 'string',     ['length' => 128]);
         $this->table->addColumn('description',    'string',     ['length' => 1024, 'notnull' => false]);
-        $this->table->addColumn('data',           'json_array', ['notnull' => false]);
+        $this->table->addColumn('data',           'json_array', ['default' => []]);
     }
 
     /**
