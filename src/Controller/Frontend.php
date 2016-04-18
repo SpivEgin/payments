@@ -3,12 +3,14 @@
 namespace Bolt\Extension\Bolt\Payments\Controller;
 
 use Bolt\Extension\Bolt\Members\AccessControl\Session as MembersSession;
-use Bolt\Extension\Bolt\Payments\Gateway\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Config\Config;
+use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
+use Bolt\Extension\Bolt\Payments\Gateway\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Gateway\Manager as GatewayManager;
-use Bolt\Extension\Bolt\Payments\Transaction\Manager as TransactionManager;;
+use Bolt\Extension\Bolt\Payments\Transaction\Manager as TransactionManager;
 use Bolt\Extension\Bolt\Payments\Transaction\RequestProcessor;
 use Bolt\Extension\Bolt\Payments\Transaction\Transaction;
+use Bolt\Extension\Bolt\ShoppingCart\ShoppingCartInterface;
 use Silex\Application;
 use Silex\ControllerCollection;
 use Silex\ControllerProviderInterface;
@@ -281,14 +283,24 @@ class Frontend implements ControllerProviderInterface
             return new Response($html);
         }
 
-        $transaction = $app['payments.processor']->getPurchase($request, $gateway);
+        if ($request->query->get('cartId') === null) {
+            return new Response('Cart ID required', Response::HTTP_PRECONDITION_FAILED);
+        }
+
+        $cart = $this->getStoredCart($app, $request);
+        $transaction = $app['payments.processor']->getPurchase($request, $gateway, $cart);
+
         $template = $this->config->getTemplate('pages', 'payment');
         $context = [
-            'method'  => 'purchase',
-            'params'  => $transaction,
-            'card'    => $transaction->getCard()->getParameters(),
+            'method'      => 'purchase',
+            'cart'        => $cart,
+            'transaction' => $transaction,
+            'card'        => $transaction->getCard()->getParameters(),
         ];
         $html = $this->render($gateway, $template, $context);
+
+        // Save the shopping cart into the session
+        $this->setStoredCart($app, $cart);
 
         return new Response($html);
     }
@@ -448,5 +460,36 @@ class Frontend implements ControllerProviderInterface
         ];
 
         return $this->twig->render($template, $context);
+    }
+
+    /**
+     * @param Application $app
+     * @param Request     $request
+     *
+     * @return ShoppingCartInterface|null
+     */
+    private function getStoredCart(Application $app, Request $request)
+    {
+        $cartId = $request->query->get('cartId');
+        $sessionName = ShoppingCartInterface::SESSION_KEY_PREFIX .  $cartId;
+        /** @var ShoppingCartInterface $cart */
+        $cart = $app['session']->get($sessionName);
+        if ($cart !== null) {
+            return $cart;
+        }
+
+        throw new ProcessorException('Invalid shopping cart');
+    }
+
+    /**
+     * Save a shopping cart into the session.
+     *
+     * @param Application           $app
+     * @param ShoppingCartInterface $cart
+     */
+    private function setStoredCart(Application $app, ShoppingCartInterface $cart)
+    {
+        $sessionName = ShoppingCartInterface::SESSION_KEY_PREFIX .  $cart->getCartId();
+        $app['session']->set($sessionName, $cart);
     }
 }

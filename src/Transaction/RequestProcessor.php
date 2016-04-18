@@ -11,6 +11,9 @@ use Bolt\Extension\Bolt\Payments\Exception\ProcessorException;
 use Bolt\Extension\Bolt\Payments\Gateway\CombinedGatewayInterface;
 use Bolt\Extension\Bolt\Payments\Gateway\Manager as GatewayManager;
 use Bolt\Extension\Bolt\Payments\Storage\Records;
+use Bolt\Extension\Bolt\ShoppingCart\Event\CartEvent;
+use Bolt\Extension\Bolt\ShoppingCart\Event\CartEvents;
+use Bolt\Extension\Bolt\ShoppingCart\ShoppingCartInterface;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\Exception\RuntimeException;
 use Omnipay\Common\Message\RedirectResponseInterface;
@@ -263,10 +266,11 @@ class RequestProcessor
      *
      * @param Request                  $request
      * @param CombinedGatewayInterface $gateway
+     * @param ShoppingCartInterface    $cart
      *
      * @return Transaction
      */
-    public function getPurchase(Request $request, CombinedGatewayInterface $gateway)
+    public function getPurchase(Request $request, CombinedGatewayInterface $gateway, ShoppingCartInterface $cart)
     {
         $name = $gateway->getName();
         $card = new CreditCard($this->gatewayManager->getSessionValue($name, static::TYPE_CARD));
@@ -274,7 +278,9 @@ class RequestProcessor
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, $this->transManager->createTransaction());
         $transaction
             ->setCard($card)
+            ->setCartId($cart->getCartId())
         ;
+        $cart->setTransactionId($transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
 
         return $transaction;
@@ -312,6 +318,15 @@ class RequestProcessor
             ->setCard($card)
             ->setClientIp($request->getClientIp())
         ;
+
+        // Get the shopping cart
+        $sessionName = ShoppingCartInterface::SESSION_KEY_PREFIX .  $transaction->getCartId();
+
+        /** @var ShoppingCartInterface $cart */
+        $cart = $this->session->get($sessionName);
+        if ($cart === null) {
+            throw new ProcessorException('Cart required');
+        }
 
         $params = $this->getGatewayParameters($name, $transaction);
         try {
@@ -371,6 +386,15 @@ class RequestProcessor
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, $this->transManager->createTransaction());
         $transaction->setClientIp($request->getClientIp());
 
+        // Get the shopping cart
+        $sessionName = ShoppingCartInterface::SESSION_KEY_PREFIX .  $transaction->getCartId();
+
+        /** @var ShoppingCartInterface $cart */
+        $cart = $this->session->get($sessionName);
+        if ($cart === null) {
+            throw new ProcessorException('Cart required');
+        }
+
         $params = $this->getGatewayParameters($name, $transaction);
         try {
             /** @var ResponseInterface $response */
@@ -387,6 +411,7 @@ class RequestProcessor
             $this->records->savePayment($payment);
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: success');
             $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_SUCCESS, $event);
+            $this->dispatcher->dispatch(CartEvents::CART_FULFILL, new CartEvent($cart));
         } elseif ($response->isRedirect()) {
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: redirect');
             $this->session->save();

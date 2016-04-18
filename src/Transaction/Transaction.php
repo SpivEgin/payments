@@ -18,6 +18,8 @@ class Transaction implements \ArrayAccess
     /** @var string */
     protected $description;
     /** @var string */
+    protected $cartId;
+    /** @var string */
     protected $transactionId;
     /** @var string */
     protected $transactionReference;
@@ -188,6 +190,26 @@ class Transaction implements \ArrayAccess
     public function setDescription($description)
     {
         $this->description = $description;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getCartId()
+    {
+        return $this->cartId;
+    }
+
+    /**
+     * @param string $cartId
+     *
+     * @return Transaction
+     */
+    public function setCartId($cartId)
+    {
+        $this->cartId = $cartId;
 
         return $this;
     }
