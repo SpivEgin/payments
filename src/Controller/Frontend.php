@@ -489,7 +489,7 @@ class Frontend implements ControllerProviderInterface
      */
     private function setStoredCart(Application $app, ShoppingCartInterface $cart)
     {
-        $sessionName = ShoppingCartInterface::SESSION_KEY_PREFIX .  $cart->getCartId();
+        $sessionName = ShoppingCartInterface::SESSION_KEY_PREFIX .  $cart->getId();
         $app['session']->set($sessionName, $cart);
     }
 }

@@ -278,7 +278,7 @@ class RequestProcessor
         $transaction = $this->gatewayManager->getSessionValue($name, static::TYPE_PURCHASE, $this->transManager->createTransaction());
         $transaction
             ->setCard($card)
-            ->setCartId($cart->getCartId())
+            ->setCartId($cart->getId())
         ;
         $cart->setTransactionId($transaction);
         $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, $transaction);
