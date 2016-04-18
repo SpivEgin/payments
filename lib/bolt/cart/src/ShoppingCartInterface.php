@@ -19,14 +19,21 @@ interface ShoppingCartInterface
     public function getCartId();
 
     /**
-     * Return the transaciton ID assigned to this cart.
+     * Check if there is a transaction ID assigned to this cart.
+     *
+     * @return boolean
+     */
+    public function hasTransactionId();
+
+    /**
+     * Return the transaction ID assigned to this cart.
      *
      * @return string
      */
     public function getTransactionId();
 
     /**
-     * Set the transaciton ID for this cart.
+     * Set the transaction ID for this cart.
      *
      * @param string $transactionId
      *

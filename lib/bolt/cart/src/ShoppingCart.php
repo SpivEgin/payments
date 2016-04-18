@@ -40,6 +40,14 @@ class ShoppingCart implements ShoppingCartInterface
     /**
      * {@inheritdoc}
      */
+    public function hasTransactionId()
+    {
+        return $this->transactionId !== null;
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function getTransactionId()
     {
         return $this->transactionId;
