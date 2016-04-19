@@ -43,7 +43,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
                 'twig',
                 function (\Twig_Environment $twig, $app) {
                     $twig->addExtension(
-                        new Twig\Functions($app['payments.config'], $app['session'], $app['request_stack'], $app['payments.transaction.manager'])
+                        new Twig\Functions($app['payments.config'], $app['storage'])
                     );
 
                     return $twig;
@@ -56,7 +56,7 @@ class PaymentsExtension extends AbstractExtension implements ServiceProviderInte
                 'safe_twig',
                 function (\Twig_Environment $twig, $app) {
                     $twig->addExtension(
-                        new Twig\Functions($app['payments.config'], $app['session'], $app['request_stack'], $app['payments.transaction.manager'])
+                        new Twig\Functions($app['payments.config'], $app['storage'])
                     );
 
                     return $twig;

@@ -3,10 +3,9 @@
 namespace Bolt\Extension\Bolt\Payments\Twig;
 
 use Bolt\Extension\Bolt\Payments\Config\Config;
-use Bolt\Extension\Bolt\Payments\Gateway\Manager as GatewayManager;
+use Bolt\Extension\Bolt\Payments\Storage;
 use Bolt\Extension\Bolt\Payments\Transaction;
-use Symfony\Component\HttpFoundation\RequestStack;
-use Symfony\Component\HttpFoundation\Session\SessionInterface;
+use Bolt\Storage\EntityManager;
 use Twig_Environment as TwigEnvironment;
 use Twig_Extension as TwigExtension;
 use Twig_Markup as TwigMarkup;
@@ -21,27 +20,19 @@ class Functions extends TwigExtension
 {
     /** @var Config */
     protected $config;
-    /** @var SessionInterface */
-    protected $session;
-    /** @var RequestStack */
-    private $requestStack;
-    /** @var Transaction\Manager */
-    private $transactionManager;
+    /** @var EntityManager */
+    protected $entityManager;
 
     /**
      * Constructor.
      *
-     * @param Config                  $config
-     * @param Config|SessionInterface $session
-     * @param RequestStack            $requestStack
-     * @param Transaction\Manager     $transactionManager
+     * @param Config        $config
+     * @param EntityManager $entityManager
      */
-    public function __construct(Config $config, SessionInterface $session, RequestStack $requestStack, Transaction\Manager $transactionManager)
+    public function __construct(Config $config, EntityManager $entityManager)
     {
         $this->config = $config;
-        $this->session = $session;
-        $this->requestStack = $requestStack;
-        $this->transactionManager = $transactionManager;
+        $this->entityManager = $entityManager;
     }
 
     /**
@@ -61,53 +52,23 @@ class Functions extends TwigExtension
         $env  = ['needs_environment' => true];
 
         return [
-            new TwigSimpleFunction('payment_button', [$this, 'getPaymentButton'], $safe + $env),
-            new TwigSimpleFunction('payment_transaction', [$this, 'createPaymentTransaction'], $safe),
+            new TwigSimpleFunction('payment', [$this, 'getPayment']),
         ];
     }
 
     /**
      * Generate a button to start payments.
      *
-     * @param TwigEnvironment $twig
-     * @param string          $gatewayName
-     * @param string          $method
-     * @param array           $hiddenInputs
+     * @param string $transactionId
      *
-     * @return TwigMarkup
+     * @return Storage\Entity\Payment|false
      */
-    public function getPaymentButton(TwigEnvironment $twig, $gatewayName, $method = 'GET', array $hiddenInputs = [])
+    public function getPayment($transactionId)
     {
-        $context = [
-            'payment_url' => $this->config->getTransactionUrl($gatewayName, 'purchase'),
-            'method'      => $method,
-            'hidden'      => $hiddenInputs,
-        ];
-        $html = $twig->render($this->config->getTemplate('button', 'payment'), $context);
+        /** @var Storage\Repository\Payment $repo */
+        $repo = $this->entityManager->getRepository(Storage\Entity\Payment::class);
+        $transactionEntity = $repo->getPaymentByTransactionId($transactionId);
 
-        return new TwigMarkup($html, 'UTF-8');
-    }
-
-    /**
-     * Create a transaction object and save to the session.
-     *
-     * <pre>
-     *  {{ payment_transaction('mollie', 'purchase', {amount: 1972.09, currency: 'EUR', description: 'Gumleaves' }) }}
-     * </pre>
-     *
-     * @param string $gatewayName
-     * @param string $transactionType
-     * @param array  $params
-     */
-    public function createPaymentTransaction($gatewayName, $transactionType, array $params = [])
-    {
-        $baseUrl = $this->requestStack->getCurrentRequest()->getUri();
-
-        $transaction = $this->transactionManager->createTransaction($params);
-        $transaction->setFinalUrl($baseUrl);
-
-        $gatewayManager = new GatewayManager($this->config, $this->session);
-        $gatewayManager->initializeSessionGateway($gatewayName);
-        $gatewayManager->setSessionValue($gatewayName, $transactionType, $transaction);
+        return $transactionEntity;
     }
 }
