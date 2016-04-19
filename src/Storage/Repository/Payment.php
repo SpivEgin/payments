@@ -76,4 +76,29 @@ class Payment extends Repository
 
         return $qb;
     }
+
+    /**
+     * Fetches a payment by transaction ID.
+     *
+     * @param string $transactionId
+     *
+     * @return Entity\Payment
+     */
+    public function getPaymentByTransactionId($transactionId)
+    {
+        $query = $this->getPaymentByTransactionIdQuery($transactionId);
+
+        return $this->findOneWith($query);
+    }
+
+    public function getPaymentByTransactionIdQuery($transactionId)
+    {
+        $qb = $this->createQueryBuilder();
+        $qb->select('*')
+            ->where('transaction_id = :transactionId')
+            ->setParameter('transactionId', $transactionId)
+        ;
+
+        return $qb;
+    }
 }
