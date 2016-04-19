@@ -52,7 +52,8 @@ class Functions extends TwigExtension
         $env  = ['needs_environment' => true];
 
         return [
-            new TwigSimpleFunction('payment', [$this, 'getPayment']),
+            new TwigSimpleFunction('payment',        [$this, 'getPayment']),
+            new TwigSimpleFunction('payment_button', [$this, 'getPaymentButton'], $safe + $env),
         ];
     }
 
@@ -70,5 +71,27 @@ class Functions extends TwigExtension
         $transactionEntity = $repo->getPaymentByTransactionId($transactionId);
 
         return $transactionEntity;
+    }
+
+    /**
+     * Generate a button to start payments.
+     *
+     * @param TwigEnvironment $twig
+     * @param string          $gatewayName
+     * @param string          $method
+     * @param array           $hiddenInputs
+     *
+     * @return TwigMarkup
+     */
+    public function getPaymentButton(TwigEnvironment $twig, $gatewayName, $method = 'GET', array $hiddenInputs = [])
+    {
+        $context = [
+            'payment_url' => $this->config->getTransactionUrl($gatewayName, 'purchase'),
+            'method'      => $method,
+            'hidden'      => $hiddenInputs,
+        ];
+        $html = $twig->render($this->config->getTemplate('button', 'payment'), $context);
+
+        return new TwigMarkup($html, 'UTF-8');
     }
 }
