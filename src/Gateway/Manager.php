@@ -80,6 +80,22 @@ class Manager
     }
 
     /**
+     * Set a session value to a gateway.
+     *
+     * @param string $name
+     * @param string $type
+     *
+     * @return Manager
+     */
+    public function removeSessionValue($name, $type)
+    {
+        $sessionName = self::getSessionName(strtolower($name), $type);
+        $this->session->remove($sessionName);
+
+        return $this;
+    }
+
+    /**
      * Initialise a gateway from session data.
      *
      * @param string $name

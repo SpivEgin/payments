@@ -415,7 +415,9 @@ class RequestProcessor
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: success');
             $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_SUCCESS, $event);
             $this->dispatcher->dispatch(CartEvents::CART_FULFILL, new CartEvent($cart));
-            $this->gatewayManager->setSessionValue($name, static::TYPE_PURCHASE, null);
+
+            // Clear the transaction from the session
+            $this->gatewayManager->removeSessionValue($name, static::TYPE_PURCHASE);
         } elseif ($response->isRedirect()) {
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: redirect');
             $this->session->save();
