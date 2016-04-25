@@ -411,22 +411,29 @@ class RequestProcessor
         $event = new PaymentEvent($transaction);
         if ($response->isSuccessful()) {
             $payment->setStatus('paid');
-            $this->records->savePayment($payment);
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: success');
+
             $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_SUCCESS, $event);
             $this->dispatcher->dispatch(CartEvents::CART_FULFILL, new CartEvent($cart));
-
-            // Clear the transaction from the session
-            $this->gatewayManager->removeSessionValue($name, static::TYPE_PURCHASE);
         } elseif ($response->isRedirect()) {
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: redirect');
             $this->session->save();
             /** @var RedirectResponseInterface $response */
             $response->redirect();
+        } elseif (method_exists($response, 'isCancelled') && $response->isCancelled()) {
+            $payment->setStatus('cancelled');
+            $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: cancelled');
+
+            $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_CANCELLED, $event);
         } else {
             $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_FAILURE, $event);
             throw new ProcessorException($response->getMessage());
         }
+
+        $this->records->savePayment($payment);
+
+        // Clear the transaction from the session
+        $this->gatewayManager->removeSessionValue($name, static::TYPE_PURCHASE);
 
         return $response;
     }
