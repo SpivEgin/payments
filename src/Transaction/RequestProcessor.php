@@ -351,6 +351,7 @@ class RequestProcessor
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'set purchase: success');
         } elseif ($response->isRedirect()) {
             $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_INITIATE, $event);
+            $this->dispatcher->dispatch(CartEvents::CART_PAYMENT_START, new CartEvent($cart));
             $this->records->createPayment($authorisation, $gateway, $transaction);
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'set purchase: redirect');
             $this->session->save();
