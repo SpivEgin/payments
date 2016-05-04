@@ -360,6 +360,7 @@ class RequestProcessor
             $response->redirect();
         } else {
             $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_FAILURE, $event);
+            $this->dispatcher->dispatch(CartEvents::CART_PAYMENT_FAILURE, new CartEvent($cart));
             throw new ProcessorException($response->getMessage());
         }
 
@@ -425,9 +426,11 @@ class RequestProcessor
             $payment->setStatus('cancelled');
             $this->records->createPaymentAudit($authorisation, $transaction, $response, 'complete purchase: cancelled');
 
-            $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_CANCELLED, $event);
+            $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_CANCEL, $event);
+            $this->dispatcher->dispatch(CartEvents::CART_PAYMENT_CANCEL, new CartEvent($cart));
         } else {
             $this->dispatcher->dispatch(PaymentEvents::PAYMENT_PURCHASE_FAILURE, $event);
+            $this->dispatcher->dispatch(CartEvents::CART_PAYMENT_FAILURE, new CartEvent($cart));
             throw new ProcessorException($response->getMessage());
         }
 
