@@ -49,10 +49,10 @@
         "bolt/bolt": "^3.0",
         "bolt/boltforms": "^3.0@dev",
         "bolt/members": "^3.0@dev",
-        "guzzle/guzzle": "^3.9"
+        "guzzle/guzzle": "^3.9",
+        "omnipay/omnipay": "^2.3"
     },
     "provide": {
-        "symfony/event-dispatcher": "2.8"
     },
     "license": "MIT",
     "authors": [
@@ -63,35 +63,7 @@
     ],
     "autoload": {
         "psr-4": {
-            "Bolt\\Extension\\Bolt\\Payments\\": "src",
-            "Bolt\\Extension\\Bolt\\ShoppingCart\\" : "lib/bolt/cart/src",
-            "Omnipay\\": "lib/omnipay/common/src/Omnipay",
-            "Omnipay\\AuthorizeNet\\": "lib/omnipay/authorizenet/src",
-            "Omnipay\\Buckaroo\\": "lib/omnipay/buckaroo/src",
-            "Omnipay\\CardSave\\": "lib/omnipay/cardsave/src",
-            "Omnipay\\Coinbase\\": "lib/omnipay/coinbase/src",
-            "Omnipay\\Common\\": "lib/omnipay/common/src/Omnipay/Common",
-            "Omnipay\\Dummy\\": "lib/omnipay/dummy/src",
-            "Omnipay\\Eway\\": "lib/omnipay/eway/src",
-            "Omnipay\\FirstData\\": "lib/omnipay/firstdata/src",
-            "Omnipay\\GoCardless\\": "lib/omnipay/gocardless/src",
-            "Omnipay\\Manual\\": "lib/omnipay/manual/src",
-            "Omnipay\\Migs\\": "lib/omnipay/migs/src",
-            "Omnipay\\Mollie\\": "lib/omnipay/mollie/src",
-            "Omnipay\\MultiSafepay\\": "lib/omnipay/multisafepay/src",
-            "Omnipay\\Netaxept\\": "lib/omnipay/netaxept/src",
-            "Omnipay\\NetBanx\\": "lib/omnipay/netbanx/src",
-            "Omnipay\\PayFast\\": "lib/omnipay/payfast/src",
-            "Omnipay\\Payflow\\": "lib/omnipay/payflow/src",
-            "Omnipay\\PaymentExpress\\": "lib/omnipay/paymentexpress/src",
-            "Omnipay\\PayPal\\": "lib/omnipay/paypal/src",
-            "Omnipay\\Pin\\": "lib/omnipay/pin/src",
-            "Omnipay\\SagePay\\": "lib/omnipay/sagepay/src",
-            "Omnipay\\SecurePay\\": "lib/omnipay/securepay/src",
-            "Omnipay\\Stripe\\": "lib/omnipay/stripe/src",
-            "Omnipay\\TargetPay\\": "lib/omnipay/targetpay/src",
-            "Omnipay\\TwoCheckout\\": "lib/omnipay/2checkout/src",
-            "Omnipay\\WorldPay\\": "lib/omnipay/worldpay/src"
+            "Bolt\\Extension\\Bolt\\Payments\\": "src"
         }
     },
     "extra": {
